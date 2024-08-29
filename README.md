@@ -1,2 +1,1 @@
 # saswat-autopay
-saswat-autopay

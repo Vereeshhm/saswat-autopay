@@ -1,0 +1,99 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '2.7.2'
+	id 'io.spring.dependency-management' version '1.1.0'
+}
+
+group = 'com.saswat'
+version = '0.0.1'
+
+java {
+	sourceCompatibility = '17'
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+
+	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-data-rest")
+    implementation("org.springframework.boot:spring-boot-starter-jdbc")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    
+	implementation group: 'jakarta.activation', name: 'jakarta.activation-api', version: '2.1.3'
+ 	implementation("org.postgresql:postgresql")
+
+    compileOnly("org.projectlombok:lombok")
+ //   developmentOnly("org.springframework.boot:spring-boot-devtools")
+   
+    annotationProcessor("org.projectlombok:lombok")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+
+task createFolder {
+	
+	def keystoreDir = new File(project.buildDir.path+"/libs", "keystore")
+	def configDir = new File(project.buildDir.path+"/libs", "config")	
+	def libDir = new File(project.buildDir.path+"/libs", "lib")	
+	 def logDir = new File(project.buildDir.path+"/libs", "logs")
+	 
+	if(!logDir.exists()) {
+        logDir.mkdirs()
+    }
+	delete libDir	
+	delete configDir
+	delete keystoreDir
+	
+	libDir.mkdirs()
+	configDir.mkdirs()
+	keystoreDir.mkdirs()
+}
+
+
+task copyLib(type: Copy) {
+	into project.buildDir.path+"/libs/lib"
+	from configurations.compileClasspath 
+}
+
+//copy keystore
+task copyKeystore(type: Copy) {
+    into project.buildDir.path+"/libs/keystore"
+    from "keystore"
+}
+
+task copyConfig(type: Copy) {
+	into project.buildDir.path+"/libs/config"
+	from "config"
+}
+
+
+task bundleAll(type: Jar){
+    dependsOn 'createFolder', 'copyLib', 'copyConfig', 'copyKeystore' 
+
+  	manifest {
+        def manifestClasspath = configurations.compileClasspath.collect { "lib/" + it.getName()}.join(' ') 
+            attributes 'Implementation-Title': 'SaswatAutopayApplication', 
+                    'Implementation-Version': version,
+                    'Main-Class': 'com.saswat.autopay.SaswatAutopayApplication',
+                    'Class-Path': manifestClasspath
+    }
+    //baseName=project.name
+    from { (configurations.compileClasspath  - configurations.compileClasspath ).collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA' 
+}
+
+task zip(type: Zip){
+    dependsOn 'bundleAll'
+    from 'build/libs'
+}
