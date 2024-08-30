@@ -32,6 +32,8 @@ public class InitiateAutopayRequestDto {
 	private String customer_authentication_id;
 	@JsonProperty("final_collection_date")
 	private String final_collection_date;
+	
+	private Float maxAmount;
 
 	public String getKey() {
 		return key;
@@ -235,6 +237,16 @@ public class InitiateAutopayRequestDto {
 		this.final_collection_date = final_collection_date;
 	}
 
+	
+	
+	public Float getMaxAmount() {
+		return maxAmount;
+	}
+
+	public void setMaxAmount(Float maxAmount) {
+		this.maxAmount = maxAmount;
+	}
+
 	@Override
 	public String toString() {
 		return "InitiateAutopayRequestDto [key=" + key + ", txnid=" + txnid + ", amount=" + amount + ", productinfo="
@@ -243,9 +255,21 @@ public class InitiateAutopayRequestDto {
 				+ ", udf4=" + udf4 + ", udf5=" + udf5 + ", udf6=" + udf6 + ", udf7=" + udf7 + ", address1=" + address1
 				+ ", address2=" + address2 + ", city=" + city + ", state=" + state + ", country=" + country
 				+ ", zipcode=" + zipcode + ", customer_authentication_id=" + customer_authentication_id
-				+ ", final_collection_date=" + final_collection_date + "]";
+				+ ", final_collection_date=" + final_collection_date + ", maxAmount=" + maxAmount + ", getKey()="
+				+ getKey() + ", getTxnid()=" + getTxnid() + ", getAmount()=" + getAmount() + ", getProductinfo()="
+				+ getProductinfo() + ", getFirstname()=" + getFirstname() + ", getPhone()=" + getPhone()
+				+ ", getEmail()=" + getEmail() + ", getSurl()=" + getSurl() + ", getFurl()=" + getFurl()
+				+ ", getHash()=" + getHash() + ", getUdf1()=" + getUdf1() + ", getUdf2()=" + getUdf2() + ", getUdf3()="
+				+ getUdf3() + ", getUdf4()=" + getUdf4() + ", getUdf5()=" + getUdf5() + ", getUdf6()=" + getUdf6()
+				+ ", getUdf7()=" + getUdf7() + ", getAddress1()=" + getAddress1() + ", getAddress2()=" + getAddress2()
+				+ ", getCity()=" + getCity() + ", getState()=" + getState() + ", getCountry()=" + getCountry()
+				+ ", getZipcode()=" + getZipcode() + ", getCustomer_authentication_id()="
+				+ getCustomer_authentication_id() + ", getFinal_collection_date()=" + getFinal_collection_date()
+				+ ", getMaxAmount()=" + getMaxAmount() + ", getClass()=" + getClass() + ", hashCode()=" + hashCode()
+				+ ", toString()=" + super.toString() + "]";
 	}
 
+	
 
 
 }

@@ -56,6 +56,14 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 		String UrlString = config.getInitiatelinkurl();
 		String txnid = generateUniqueTransactionId();
 		String customerAuthenticationId = generateUniqueCustomerAuthenticationId();
+		
+		initiateAutopayRequestDto.setUdf2("NA");
+		initiateAutopayRequestDto.setUdf3("NA");
+		initiateAutopayRequestDto.setUdf4("NA");
+		initiateAutopayRequestDto.setUdf5(initiateAutopayRequestDto.getMaxAmount());
+		initiateAutopayRequestDto.setUdf6("NA");
+		initiateAutopayRequestDto.setUdf7("NA");
+		
 
 		logger.info("Uniquely generated txnid " + txnid);
 
