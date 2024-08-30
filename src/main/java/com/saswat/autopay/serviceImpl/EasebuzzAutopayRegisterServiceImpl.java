@@ -6,7 +6,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.UUID;
@@ -26,7 +29,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.saswat.autopay.Utils.HashUtil;
+import com.saswat.autopay.Utils.DebitAutopayRequestDto;
 import com.saswat.autopay.Utils.InitiateAutopayRequestDto;
 import com.saswat.autopay.Utils.PropertiesConfig;
 import com.saswat.autopay.service.EasebuzzAutopayRegisterService;
@@ -52,57 +55,48 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 		// Prepare URL and transaction ID
 		String UrlString = config.getInitiatelinkurl();
 		String txnid = generateUniqueTransactionId();
-		String customerAuthenticationId = "apay_" + txnid;
-
-		initiateAutopayRequestDto.setTxnid(txnid);
-		initiateAutopayRequestDto.setCustomer_authentication_id(customerAuthenticationId);
-		initiateAutopayRequestDto.setSurl(config.getSurl());
-		initiateAutopayRequestDto.setFurl(config.getFurl());
-		initiateAutopayRequestDto.setKey(config.getMerchantKey());
+		String customerAuthenticationId = generateUniqueCustomerAuthenticationId();
 
 		logger.info("Uniquely generated txnid " + txnid);
 
-		// Generate hash
-		String hashString = config.getMerchantKey() + "|" + txnid + "|" + initiateAutopayRequestDto.getAmount() + "|"
+		// Generate hash string
+		String hashString = config.getKey() + "|" + txnid + "|" + initiateAutopayRequestDto.getAmount() + "|"
 				+ initiateAutopayRequestDto.getProductinfo() + "|" + initiateAutopayRequestDto.getFirstname() + "|"
 				+ initiateAutopayRequestDto.getEmail() + "|" + initiateAutopayRequestDto.getUdf1() + "|"
 				+ initiateAutopayRequestDto.getUdf2() + "|" + initiateAutopayRequestDto.getUdf3() + "|"
 				+ initiateAutopayRequestDto.getUdf4() + "|" + initiateAutopayRequestDto.getUdf5() + "|"
-				+ initiateAutopayRequestDto.getUdf6() + "|" + initiateAutopayRequestDto.getUdf7() + "|"
-				+ initiateAutopayRequestDto.getUdf8() + "|" + initiateAutopayRequestDto.getUdf9() + "|"
-				+ initiateAutopayRequestDto.getUdf10() + "|" + config.getMerchantSalt();
+				+ initiateAutopayRequestDto.getUdf6() + "|" + initiateAutopayRequestDto.getUdf7() + "||||"
+				+ config.getSalt();
 
-		String hash = HashUtil.generateHash(hashString);
+		logger.info("Final Hash String before hashing: {}", hashString);
+
+		String hash = generateHash(hashString);
 
 		logger.info("Generated Hash: " + hash);
-		initiateAutopayRequestDto.setHash(hash);
 
-		// Prepare URL parameters
-		String urlParameters = "key=" + config.getMerchantKey() + "&txnid=" + txnid + "&amount="
+		String urlParameters = "key=" + config.getKey() + "&txnid=" + txnid + "&amount="
 				+ initiateAutopayRequestDto.getAmount() + "&productinfo=" + initiateAutopayRequestDto.getProductinfo()
 				+ "&firstname=" + initiateAutopayRequestDto.getFirstname() + "&phone="
 				+ initiateAutopayRequestDto.getPhone() + "&email=" + initiateAutopayRequestDto.getEmail() + "&surl="
-				+ config.getSurl() + "&furl=" + config.getFurl() + "&hash=" + hash
+				+ config.getSurl() + "&furl=" + config.getFurl()
+
+				+ "&hash=" + hash
 
 				+ "&udf1=" + initiateAutopayRequestDto.getUdf1() + "&udf2=" + initiateAutopayRequestDto.getUdf2()
 				+ "&udf3=" + initiateAutopayRequestDto.getUdf3() + "&udf4=" + initiateAutopayRequestDto.getUdf4()
-				+ "&udf5=" + initiateAutopayRequestDto.getUdf5() + "&udf6=" + initiateAutopayRequestDto.getUdf6()
-				+ "&udf7=" + initiateAutopayRequestDto.getUdf7() + "&udf8=" + initiateAutopayRequestDto.getUdf8()
+				+ "&udf5=" + initiateAutopayRequestDto.getUdf5()
 
-				+ "&udf9=" + initiateAutopayRequestDto.getUdf9() + "&udf10=" + initiateAutopayRequestDto.getUdf10() +
+				+ "&udf6=" + initiateAutopayRequestDto.getUdf6() + "&udf7=" + initiateAutopayRequestDto.getUdf7()
 
-				"&address1=" + initiateAutopayRequestDto.getAddress1() + "&address2="
+				+ "&address1=" + initiateAutopayRequestDto.getAddress1() + "&address2="
 				+ initiateAutopayRequestDto.getAddress2() + "&city=" + initiateAutopayRequestDto.getCity() + "&state="
 				+ initiateAutopayRequestDto.getState() + "&country=" + initiateAutopayRequestDto.getCountry()
 				+ "&zipcode=" + initiateAutopayRequestDto.getZipcode() + "&customer_authentication_id="
-				+ customerAuthenticationId + "&showpaymentmode=" + initiateAutopayRequestDto.getShow_payment_mode()
-				+ "&submerchantid=" + initiateAutopayRequestDto.getSub_merchant_id() + "&requestflow="
-				+ initiateAutopayRequestDto.getRequest_flow() + "&finalcollectiondate="
-				+ initiateAutopayRequestDto.getFinal_collection_date();
+				+ customerAuthenticationId
 
-		logger.info("Request for Autopay Register : {}", initiateAutopayRequestDto);
+				+ "&final_collection_date=" + initiateAutopayRequestDto.getFinal_collection_date();
+
 		String response1;
-
 		HttpURLConnection connection = null;
 
 		try {
@@ -133,7 +127,6 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 					}
 				}
 				response1 = response.toString();
-
 				logger.info("Response Body " + response1);
 
 				// Parse JSON response to retrieve the access key
@@ -153,6 +146,7 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 					responseObject.put("txnid", txnid);
 					responseObject.put("customer_authentication_id", customerAuthenticationId);
 					responseObject.put("auto_debit_access_key", accessKey);
+
 					logger.info("Response Body " + responseObject);
 					return ResponseEntity.status(responseCode).body(responseObject.toString());
 
@@ -178,7 +172,7 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 				}
 				response1 = response.toString();
 
-				logger.error("Error          Response Body: " + response1);
+				logger.error("Error Response Body: " + response1);
 
 				return ResponseEntity.status(responseCode).body(response1);
 			}
@@ -191,8 +185,114 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 			if (connection != null) {
 				connection.disconnect();
 			}
-
 		}
+	}
+
+	@Override
+	public ResponseEntity<String> debitRequest(DebitAutopayRequestDto debitAutopayRequestDto) throws Exception {
+
+		String UrlString = config.getDebitRequesturl();
+		String txnid = generateUniqueTransactionId();
+
+		String merchant_debit_id = generateUniqueMerchantDebitId();
+		logger.info("Uniquely generated txnid " + txnid);
+		logger.info("Uniquely generated merchant_debit_id " + merchant_debit_id);
+
+		// Generate hash string
+		String hashString = config.getKey() + "|" + txnid+ "|" + debitAutopayRequestDto.getAmount() + "|"
+				+ debitAutopayRequestDto.getProductinfo() + "|" + debitAutopayRequestDto.getFirstname() + "|"
+				+ debitAutopayRequestDto.getEmail() + "|" + debitAutopayRequestDto.getUdf1() + "|"
+				+ debitAutopayRequestDto.getUdf2() + "|" + debitAutopayRequestDto.getUdf3() + "|"
+				+ debitAutopayRequestDto.getUdf4() + "|" + debitAutopayRequestDto.getUdf5() + "||||||"
+				+ config.getSalt();
+
+		logger.info("Final Hash String before hashing: {}", hashString);
+
+		String hash = generateHash(hashString);
+
+		logger.info("Generated Hash: " + hash);
+
+		String urlParameters = "key=" + config.getKey() + "&txnid=" + txnid + "&amount="
+				+ debitAutopayRequestDto.getAmount() + "&productinfo=" + debitAutopayRequestDto.getProductinfo()
+				+ "&firstname=" + debitAutopayRequestDto.getFirstname() + "&phone=" + debitAutopayRequestDto.getPhone()
+				+ "&email=" + debitAutopayRequestDto.getEmail() + "&surl=" + config.getSurl() + "&furl="
+				+ config.getFurl()
+
+				+ "&hash=" + hash
+
+				+ "&udf1=" + debitAutopayRequestDto.getUdf1() + "&udf2=" + debitAutopayRequestDto.getUdf2() + "&udf3="
+				+ debitAutopayRequestDto.getUdf3() + "&udf4=" + debitAutopayRequestDto.getUdf4() + "&udf5="
+				+ debitAutopayRequestDto.getUdf5()
+
+				+ "&address1=" + debitAutopayRequestDto.getAddress1() + "&address2="
+				+ debitAutopayRequestDto.getAddress2() + "&city=" + debitAutopayRequestDto.getCity() + "&state="
+				+ debitAutopayRequestDto.getState() + "&country=" + debitAutopayRequestDto.getCountry() + "&zipcode="
+				+ debitAutopayRequestDto.getZipcode() 
+				
+				+ "&customer_authentication_id="
+				+ debitAutopayRequestDto.getCustomer_authentication_id() 
+				
+				+ "&merchant_debit_id=" + merchant_debit_id
+				+ "&auto_debit_access_key=" + debitAutopayRequestDto.getAuto_debit_access_key();
+
+		String response1;
+		HttpURLConnection connection = null;
+
+		try {
+			// Send POST request
+			URL url = new URL(UrlString);
+			connection = (HttpURLConnection) url.openConnection();
+			connection.setRequestMethod("POST");
+			connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+			connection.setDoOutput(true);
+
+			logger.info("Request Url " + UrlString);
+			logger.info("Request Body " + urlParameters);
+
+			try (DataOutputStream wr = new DataOutputStream(connection.getOutputStream())) {
+				wr.writeBytes(urlParameters);
+				wr.flush();
+			}
+
+			int responseCode = connection.getResponseCode();
+			logger.info("Response Code " + responseCode);
+
+			StringBuilder response = new StringBuilder();
+			if (responseCode == HttpURLConnection.HTTP_OK) {
+				try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+					String inputLine;
+					while ((inputLine = in.readLine()) != null) {
+						response.append(inputLine);
+					}
+				}
+				response1 = response.toString();
+				logger.info("Response Body " + response1);
+
+				return ResponseEntity.status(responseCode).body(response1);
+
+			} else {
+				try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getErrorStream()))) {
+					String inputLine;
+					while ((inputLine = in.readLine()) != null) {
+						response.append(inputLine);
+					}
+				}
+				response1 = response.toString();
+
+				logger.error("Error Response Body: " + response1);
+
+				return ResponseEntity.status(responseCode).body(response1);
+			}
+		} catch (IOException e) {
+			response1 = e.getMessage();
+
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response1);
+		} finally {
+			if (connection != null) {
+				connection.disconnect();
+			}
+		}
+
 	}
 
 	private SecretKey generateSecretKey() {
@@ -227,4 +327,42 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 		int desiredLength = 32;
 		return alphanumericId.substring(0, Math.min(desiredLength, alphanumericId.length()));
 	}
+
+	private String generateUniqueMerchantDebitId() throws Exception {
+
+//		String uuid = UUID.randomUUID().toString();
+//
+//		String encryptedUuid = encrypt(uuid);
+//
+//		String base64EncodedUuid = Base64.getUrlEncoder().encodeToString(encryptedUuid.getBytes());
+//
+//		return base64EncodedUuid.substring(0, 8) + "-" + base64EncodedUuid.substring(8, 12) + "-"
+//				+ base64EncodedUuid.substring(12, 16) + "-" + base64EncodedUuid.substring(16, 20) + "-"
+//				+ base64EncodedUuid.substring(20, 32);
+		String uuid = UUID.randomUUID().toString().replace("-", "");
+		String encryptedUuid = encrypt(uuid);
+		String alphanumericId = encryptedUuid.replaceAll("[^a-zA-Z0-9]", "");
+		int desiredLength = 32;
+		return alphanumericId.substring(0, Math.min(desiredLength, alphanumericId.length()));
+	}
+
+	private String generateUniqueCustomerAuthenticationId() throws Exception {
+		String uuid = UUID.randomUUID().toString().replace("-", "");
+		String encryptedUuid = encrypt(uuid);
+		String alphanumericId = encryptedUuid.replaceAll("[^a-zA-Z0-9]", "");
+		int desiredLength = 32;
+		return alphanumericId.substring(0, Math.min(desiredLength, alphanumericId.length()));
+	}
+
+	private String generateHash(String input) throws NoSuchAlgorithmException {
+		MessageDigest md = MessageDigest.getInstance("sha512");
+		md.update(input.getBytes(StandardCharsets.UTF_8)); // Ensure UTF-8 encoding
+		byte[] hashBytes = md.digest();
+		StringBuilder sb = new StringBuilder();
+		for (byte b : hashBytes) {
+			sb.append(String.format("%02x", b));
+		}
+		return sb.toString();
+	}
+
 }

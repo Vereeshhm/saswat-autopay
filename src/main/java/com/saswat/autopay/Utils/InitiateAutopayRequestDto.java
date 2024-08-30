@@ -18,12 +18,10 @@ public class InitiateAutopayRequestDto {
 	private String udf2;
 	private String udf3;
 	private String udf4;
-	private String udf5;
+	private Float udf5;
 	private String udf6;
 	private String udf7;
-	private String udf8;
-	private String udf9;
-	private String udf10;
+
 	private String address1;
 	private String address2;
 	private String city;
@@ -32,12 +30,6 @@ public class InitiateAutopayRequestDto {
 	private String zipcode;
 	@JsonProperty("customer_authentication_id")
 	private String customer_authentication_id;
-	@JsonProperty("show_payment_mode")
-	private String show_payment_mode;
-	@JsonProperty("sub_merchant_id")
-	private String sub_merchant_id;
-	@JsonProperty("request_flow")
-	private String request_flow;
 	@JsonProperty("final_collection_date")
 	private String final_collection_date;
 
@@ -153,11 +145,11 @@ public class InitiateAutopayRequestDto {
 		this.udf4 = udf4;
 	}
 
-	public String getUdf5() {
+	public Float getUdf5() {
 		return udf5;
 	}
 
-	public void setUdf5(String udf5) {
+	public void setUdf5(Float udf5) {
 		this.udf5 = udf5;
 	}
 
@@ -233,29 +225,7 @@ public class InitiateAutopayRequestDto {
 		this.customer_authentication_id = customer_authentication_id;
 	}
 
-	public String getShow_payment_mode() {
-		return show_payment_mode;
-	}
 
-	public void setShow_payment_mode(String show_payment_mode) {
-		this.show_payment_mode = show_payment_mode;
-	}
-
-	public String getSub_merchant_id() {
-		return sub_merchant_id;
-	}
-
-	public void setSub_merchant_id(String sub_merchant_id) {
-		this.sub_merchant_id = sub_merchant_id;
-	}
-
-	public String getRequest_flow() {
-		return request_flow;
-	}
-
-	public void setRequest_flow(String request_flow) {
-		this.request_flow = request_flow;
-	}
 
 	public String getFinal_collection_date() {
 		return final_collection_date;
@@ -265,41 +235,17 @@ public class InitiateAutopayRequestDto {
 		this.final_collection_date = final_collection_date;
 	}
 
-	public String getUdf8() {
-		return udf8;
-	}
-
-	public void setUdf8(String udf8) {
-		this.udf8 = udf8;
-	}
-
-	public String getUdf9() {
-		return udf9;
-	}
-
-	public void setUdf9(String udf9) {
-		this.udf9 = udf9;
-	}
-
-	public String getUdf10() {
-		return udf10;
-	}
-
-	public void setUdf10(String udf10) {
-		this.udf10 = udf10;
-	}
-
 	@Override
 	public String toString() {
 		return "InitiateAutopayRequestDto [key=" + key + ", txnid=" + txnid + ", amount=" + amount + ", productinfo="
 				+ productinfo + ", firstname=" + firstname + ", phone=" + phone + ", email=" + email + ", surl=" + surl
 				+ ", furl=" + furl + ", hash=" + hash + ", udf1=" + udf1 + ", udf2=" + udf2 + ", udf3=" + udf3
-				+ ", udf4=" + udf4 + ", udf5=" + udf5 + ", udf6=" + udf6 + ", udf7=" + udf7 + ", udf8=" + udf8
-				+ ", udf9=" + udf9 + ", udf10=" + udf10 + ", address1=" + address1 + ", address2=" + address2
-				+ ", city=" + city + ", state=" + state + ", country=" + country + ", zipcode=" + zipcode
-				+ ", customer_authentication_id=" + customer_authentication_id + ", show_payment_mode="
-				+ show_payment_mode + ", sub_merchant_id=" + sub_merchant_id + ", request_flow=" + request_flow
+				+ ", udf4=" + udf4 + ", udf5=" + udf5 + ", udf6=" + udf6 + ", udf7=" + udf7 + ", address1=" + address1
+				+ ", address2=" + address2 + ", city=" + city + ", state=" + state + ", country=" + country
+				+ ", zipcode=" + zipcode + ", customer_authentication_id=" + customer_authentication_id
 				+ ", final_collection_date=" + final_collection_date + "]";
 	}
+
+
 
 }

@@ -35,11 +35,11 @@ public class PropertiesConfig {
 	private String Initiatelinkurl;
 	
 	
-	@Value("${Key}")
-	private String MerchantKey;
+	@Value("${key}")
+	private String key;
 
-	@Value("${Salt}")
-	private String MerchantSalt;
+	@Value("${salt}")
+	private String salt;
 
 	@Value("${successurl}")
 	private String surl;
@@ -49,6 +49,9 @@ public class PropertiesConfig {
 	
 	@Value("${Payment.Url}")
 	private String PaymentUrl;
+	
+	@Value("${DebitRequest.url}")
+	private String DebitRequesturl;
 
 //	@Value("${x-client-unique-id}")
 //	private String x_client_unique_id;
@@ -65,24 +68,33 @@ public class PropertiesConfig {
 		return PaymentUrl;
 	}
 
+	public String getDebitRequesturl() {
+		return DebitRequesturl;
+	}
+
+	public void setDebitRequesturl(String debitRequesturl) {
+		DebitRequesturl = debitRequesturl;
+	}
+
 	public void setPaymentUrl(String paymentUrl) {
 		PaymentUrl = paymentUrl;
 	}
 
-	public String getMerchantKey() {
-		return MerchantKey;
+	
+	public String getKey() {
+		return key;
 	}
 
-	public void setMerchantKey(String merchantKey) {
-		MerchantKey = merchantKey;
+	public void setKey(String key) {
+		this.key = key;
 	}
 
-	public String getMerchantSalt() {
-		return MerchantSalt;
+	public String getSalt() {
+		return salt;
 	}
 
-	public void setMerchantSalt(String merchantSalt) {
-		MerchantSalt = merchantSalt;
+	public void setSalt(String salt) {
+		this.salt = salt;
 	}
 
 	public String getSurl() {
