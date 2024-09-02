@@ -11,7 +11,9 @@ import java.security.Key;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.time.LocalDateTime;
 import java.util.Base64;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.crypto.Cipher;
@@ -30,8 +32,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.saswat.autopay.Utils.DebitAutopayRequestDto;
-import com.saswat.autopay.Utils.InitiateAutopayRequestDto;
 import com.saswat.autopay.Utils.PropertiesConfig;
+import com.saswat.autopay.model.AutopayApiLog;
+import com.saswat.autopay.model.Debitresponsedetails;
+import com.saswat.autopay.model.InitiateAutopayRequestDto;
+import com.saswat.autopay.repository.AutopayApilogrepository;
+import com.saswat.autopay.repository.DebitResponseRepository;
+import com.saswat.autopay.repository.InitiateAutopayRepository;
 import com.saswat.autopay.service.EasebuzzAutopayRegisterService;
 
 @Service
@@ -40,12 +47,34 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 	@Autowired
 	PropertiesConfig config;
 
+	@Autowired
+	AutopayApilogrepository autopayapilogrepository;
+
+	@Autowired
+	InitiateAutopayRepository initiateAutopayRepository;
+
+	@Autowired
+	DebitResponseRepository debitResponseRepository;
+
 	private Key secretKey;
 
 	private static final Logger logger = LoggerFactory.getLogger(EasebuzzAutopayRegisterServiceImpl.class);
 
 	public EasebuzzAutopayRegisterServiceImpl() {
 		this.secretKey = generateSecretKey();
+	}
+
+	public void logApi(String url, String requestBody, String responseBody, HttpStatus status) {
+		AutopayApiLog apiLog = new AutopayApiLog();
+
+		apiLog.setUrl(url);
+		apiLog.setRequestBody(requestBody);
+		apiLog.setResponseBody(responseBody);
+		apiLog.setStatus(status.value()); // Status will now be correctly set
+		apiLog.setTimestamp(LocalDateTime.now());
+		autopayapilogrepository.save(apiLog);
+
+		logger.info("API: {}, Status: {}, Request: {}, Response: {}", url, status.value(), requestBody, responseBody);
 	}
 
 	@Override
@@ -56,16 +85,16 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 		String UrlString = config.getInitiatelinkurl();
 		String txnid = generateUniqueTransactionId();
 		String customerAuthenticationId = generateUniqueCustomerAuthenticationId();
-		
+
 		initiateAutopayRequestDto.setUdf2("NA");
 		initiateAutopayRequestDto.setUdf3("NA");
 		initiateAutopayRequestDto.setUdf4("NA");
 		initiateAutopayRequestDto.setUdf5(initiateAutopayRequestDto.getMaxAmount());
 		initiateAutopayRequestDto.setUdf6("NA");
 		initiateAutopayRequestDto.setUdf7("NA");
-		
 
-		logger.info("Uniquely generated txnid " + txnid);
+		logger.info("Uniquely generated txnid for registerautopay" + txnid);
+		logger.info("Uniquely generated customerAuthenticationId for registerautopay " + customerAuthenticationId);
 
 		// Generate hash string
 		String hashString = config.getKey() + "|" + txnid + "|" + initiateAutopayRequestDto.getAmount() + "|"
@@ -80,7 +109,7 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 
 		String hash = generateHash(hashString);
 
-		logger.info("Generated Hash: " + hash);
+		logger.info("Generated Hash for registerautopay: " + hash);
 
 		String urlParameters = "key=" + config.getKey() + "&txnid=" + txnid + "&amount="
 				+ initiateAutopayRequestDto.getAmount() + "&productinfo=" + initiateAutopayRequestDto.getProductinfo()
@@ -101,8 +130,18 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 				+ initiateAutopayRequestDto.getState() + "&country=" + initiateAutopayRequestDto.getCountry()
 				+ "&zipcode=" + initiateAutopayRequestDto.getZipcode() + "&customer_authentication_id="
 				+ customerAuthenticationId
+//				+"&show_payment_mode=" +initiateAutopayRequestDto.getShow_payment_mode()
 
-				+ "&final_collection_date=" + initiateAutopayRequestDto.getFinal_collection_date();
+				+ "&final_collection_date=" + initiateAutopayRequestDto.getFinal_collection_date() + "&request_flow="
+				+ initiateAutopayRequestDto.getRequest_flow();
+
+//		initiateAutopayRequestDto.setCustomer_authentication_id(customerAuthenticationId);
+//		initiateAutopayRequestDto.setSurl(config.getSurl());
+//		initiateAutopayRequestDto.setFurl(config.getFurl());
+//		initiateAutopayRequestDto.setTxnid(txnid);
+//		initiateAutopayRequestDto.setHash(hash);
+//		initiateAutopayRequestDto.setKey(config.getKey());
+//		initiateAutopayRepository.save(initiateAutopayRequestDto);
 
 		String response1;
 		HttpURLConnection connection = null;
@@ -153,9 +192,10 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 					responseObject.put("paymentUrl", paymentUrl);
 					responseObject.put("txnid", txnid);
 					responseObject.put("customer_authentication_id", customerAuthenticationId);
-					responseObject.put("auto_debit_access_key", accessKey);
+					responseObject.put("access_key", accessKey);
 
 					logger.info("Response Body " + responseObject);
+					logApi(UrlString, urlParameters, responseObject.toString(), HttpStatus.OK);
 					return ResponseEntity.status(responseCode).body(responseObject.toString());
 
 				} else {
@@ -167,7 +207,7 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 					errorResponse.put("status", 0);
 					errorResponse.put("error_desc", errorDesc);
 					errorResponse.put("data", data);
-
+					logApi(UrlString, urlParameters, errorResponse.toString(), HttpStatus.OK);
 					return ResponseEntity.status(responseCode).body(errorResponse.toString());
 				}
 
@@ -181,33 +221,65 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 				response1 = response.toString();
 
 				logger.error("Error Response Body: " + response1);
+				logApi(UrlString, urlParameters, response1, HttpStatus.valueOf(responseCode));
 
 				return ResponseEntity.status(responseCode).body(response1);
 			}
 
 		} catch (IOException e) {
 			response1 = e.getMessage();
-
+			logApi(UrlString, urlParameters, response1, HttpStatus.INTERNAL_SERVER_ERROR);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response1);
 		} finally {
 			if (connection != null) {
 				connection.disconnect();
 			}
+
 		}
 	}
 
 	@Override
 	public ResponseEntity<String> debitRequest(DebitAutopayRequestDto debitAutopayRequestDto) throws Exception {
 
+		Optional<InitiateAutopayRequestDto> autopayEntityOpt = initiateAutopayRepository
+				.findByCustomerAuthenticationId(debitAutopayRequestDto.getCustomer_authentication_id());
+
+		if (!autopayEntityOpt.isPresent()) {
+			// Handle case where entity is not found
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+					.body("Entity not found for the provided customer_authentication_id");
+		}
+
+		// Extract the entity from Optional
+		InitiateAutopayRequestDto autopayEntity = autopayEntityOpt.get();
+
+		// Set fields from the entity
+		debitAutopayRequestDto.setProductinfo(autopayEntity.getProductinfo());
+		debitAutopayRequestDto.setFirstname(autopayEntity.getFirstname());
+		debitAutopayRequestDto.setPhone(autopayEntity.getPhone());
+		debitAutopayRequestDto.setEmail(autopayEntity.getEmail());
+		debitAutopayRequestDto.setUdf1(autopayEntity.getUdf1());
+		debitAutopayRequestDto.setAddress1(autopayEntity.getAddress1());
+		debitAutopayRequestDto.setAddress2(autopayEntity.getAddress2());
+		debitAutopayRequestDto.setCity(autopayEntity.getCity());
+		debitAutopayRequestDto.setState(autopayEntity.getState());
+		debitAutopayRequestDto.setCountry(autopayEntity.getCountry());
+		debitAutopayRequestDto.setZipcode(autopayEntity.getZipcode());
+
 		String UrlString = config.getDebitRequesturl();
 		String txnid = generateUniqueTransactionId();
 
 		String merchant_debit_id = generateUniqueMerchantDebitId();
-		logger.info("Uniquely generated txnid " + txnid);
-		logger.info("Uniquely generated merchant_debit_id " + merchant_debit_id);
+		logger.info("Uniquely generated txnid for debitrequest " + txnid);
+		logger.info("Uniquely generated merchant_debit_id for debitreques " + merchant_debit_id);
+
+		debitAutopayRequestDto.setUdf2("NA");
+		debitAutopayRequestDto.setUdf3("NA");
+		debitAutopayRequestDto.setUdf4("NA");
+		debitAutopayRequestDto.setUdf5("NA");
 
 		// Generate hash string
-		String hashString = config.getKey() + "|" + txnid+ "|" + debitAutopayRequestDto.getAmount() + "|"
+		String hashString = config.getKey() + "|" + txnid + "|" + debitAutopayRequestDto.getAmount() + "|"
 				+ debitAutopayRequestDto.getProductinfo() + "|" + debitAutopayRequestDto.getFirstname() + "|"
 				+ debitAutopayRequestDto.getEmail() + "|" + debitAutopayRequestDto.getUdf1() + "|"
 				+ debitAutopayRequestDto.getUdf2() + "|" + debitAutopayRequestDto.getUdf3() + "|"
@@ -235,13 +307,12 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 				+ "&address1=" + debitAutopayRequestDto.getAddress1() + "&address2="
 				+ debitAutopayRequestDto.getAddress2() + "&city=" + debitAutopayRequestDto.getCity() + "&state="
 				+ debitAutopayRequestDto.getState() + "&country=" + debitAutopayRequestDto.getCountry() + "&zipcode="
-				+ debitAutopayRequestDto.getZipcode() 
-				
-				+ "&customer_authentication_id="
-				+ debitAutopayRequestDto.getCustomer_authentication_id() 
-				
-				+ "&merchant_debit_id=" + merchant_debit_id
-				+ "&auto_debit_access_key=" + debitAutopayRequestDto.getAuto_debit_access_key();
+				+ debitAutopayRequestDto.getZipcode()
+
+				+ "&customer_authentication_id=" + debitAutopayRequestDto.getCustomer_authentication_id()
+
+				+ "&merchant_debit_id=" + merchant_debit_id + "&auto_debit_access_key="
+				+ debitAutopayRequestDto.getAuto_debit_access_key();
 
 		String response1;
 		HttpURLConnection connection = null;
@@ -275,8 +346,45 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 				}
 				response1 = response.toString();
 				logger.info("Response Body " + response1);
+				ObjectMapper mapper = new ObjectMapper();
+				JsonNode jsonResponse = mapper.readTree(response1);
 
-				return ResponseEntity.status(responseCode).body(response1);
+				int status = jsonResponse.get("status").asInt();
+				String data = jsonResponse.get("data").asText();
+				if (status == 1) {
+					// Success scenario
+
+					ObjectNode responseObject = mapper.createObjectNode();
+					responseObject.put("status", 1);
+					responseObject.put("data", data);
+					responseObject.put("txnid", txnid);
+					responseObject.put("merchant_debit_id", merchant_debit_id);
+
+					Debitresponsedetails debitresponsedetails = new Debitresponsedetails();
+
+					debitresponsedetails.setStatus(status);
+					debitresponsedetails.setData(data);
+					debitresponsedetails.setTxnid(txnid);
+					debitresponsedetails.setMerchant_debit_id(merchant_debit_id);
+
+					debitResponseRepository.save(debitresponsedetails);
+
+					logger.info("Response Body " + responseObject);
+					logApi(UrlString, urlParameters, responseObject.toString(), HttpStatus.OK);
+					return ResponseEntity.status(responseCode).body(responseObject.toString());
+
+				} else {
+					// Error scenario
+					String errorDesc = jsonResponse.get("error_desc").asText();
+					String data1 = jsonResponse.get("data").asText();
+
+					ObjectNode errorResponse = mapper.createObjectNode();
+					errorResponse.put("status", 0);
+					errorResponse.put("error_desc", errorDesc);
+					errorResponse.put("data", data1);
+					logApi(UrlString, urlParameters, errorResponse.toString(), HttpStatus.OK);
+					return ResponseEntity.status(responseCode).body(errorResponse.toString());
+				}
 
 			} else {
 				try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getErrorStream()))) {
@@ -286,14 +394,14 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 					}
 				}
 				response1 = response.toString();
-
+				logApi(UrlString, urlParameters, response1, HttpStatus.OK);
 				logger.error("Error Response Body: " + response1);
 
 				return ResponseEntity.status(responseCode).body(response1);
 			}
 		} catch (IOException e) {
 			response1 = e.getMessage();
-
+			logApi(UrlString, urlParameters, response1, HttpStatus.INTERNAL_SERVER_ERROR);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response1);
 		} finally {
 			if (connection != null) {
@@ -338,15 +446,6 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 
 	private String generateUniqueMerchantDebitId() throws Exception {
 
-//		String uuid = UUID.randomUUID().toString();
-//
-//		String encryptedUuid = encrypt(uuid);
-//
-//		String base64EncodedUuid = Base64.getUrlEncoder().encodeToString(encryptedUuid.getBytes());
-//
-//		return base64EncodedUuid.substring(0, 8) + "-" + base64EncodedUuid.substring(8, 12) + "-"
-//				+ base64EncodedUuid.substring(12, 16) + "-" + base64EncodedUuid.substring(16, 20) + "-"
-//				+ base64EncodedUuid.substring(20, 32);
 		String uuid = UUID.randomUUID().toString().replace("-", "");
 		String encryptedUuid = encrypt(uuid);
 		String alphanumericId = encryptedUuid.replaceAll("[^a-zA-Z0-9]", "");

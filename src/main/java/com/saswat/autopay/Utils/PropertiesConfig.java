@@ -8,33 +8,9 @@ import org.springframework.context.annotation.PropertySource;
 @PropertySource("file:config/application.properties")
 public class PropertiesConfig {
 
-	@Value("${InitiateUrl}")
-	private String InitiateUrl;
-	@Value("${DebitUrl}")
-	private String DebitUrl;
-
-	@Value("${TransactionUrl}")
-	private String TransactionUrl;
-
-	@Value("${CancelUrl}")
-	private String CancelUrl;
-
-	@Value("${successRedirectUrl}")
-	private String successRedirectUrl;
-
-	@Value("${failureRedirectUrl}")
-	private String failureRedirectUrl;
-
-	@Value("${callbackUrl}")
-	private String callbackUrl;
-
-	@Value("${subMerchantId}")
-	private String subMerchantId;
-	
 	@Value("${Initiatelink.url}")
 	private String Initiatelinkurl;
-	
-	
+
 	@Value("${key}")
 	private String key;
 
@@ -46,23 +22,23 @@ public class PropertiesConfig {
 
 	@Value("${failureurl}")
 	private String furl;
-	
+
 	@Value("${Payment.Url}")
 	private String PaymentUrl;
-	
+
 	@Value("${DebitRequest.url}")
 	private String DebitRequesturl;
+	
+	@Value("${InitiateEnachpay.Url}")
+	private String InitiateEnachpayUrl;
 
-//	@Value("${x-client-unique-id}")
-//	private String x_client_unique_id;
-//
-//	public String getX_client_unique_id() {
-//		return x_client_unique_id;
-//	}
-//
-//	public void setX_client_unique_id(String x_client_unique_id) {
-//		this.x_client_unique_id = x_client_unique_id;
-//	}
+	public String getInitiateEnachpayUrl() {
+		return InitiateEnachpayUrl;
+	}
+
+	public void setInitiateEnachpayUrl(String initiateEnachpayUrl) {
+		InitiateEnachpayUrl = initiateEnachpayUrl;
+	}
 
 	public String getPaymentUrl() {
 		return PaymentUrl;
@@ -80,7 +56,6 @@ public class PropertiesConfig {
 		PaymentUrl = paymentUrl;
 	}
 
-	
 	public String getKey() {
 		return key;
 	}
@@ -119,70 +94,6 @@ public class PropertiesConfig {
 
 	public void setInitiatelinkurl(String initiatelinkurl) {
 		Initiatelinkurl = initiatelinkurl;
-	}
-
-	public String getCancelUrl() {
-		return CancelUrl;
-	}
-
-	public void setCancelUrl(String cancelUrl) {
-		CancelUrl = cancelUrl;
-	}
-
-	public String getTransactionUrl() {
-		return TransactionUrl;
-	}
-
-	public void setTransactionUrl(String transactionUrl) {
-		TransactionUrl = transactionUrl;
-	}
-
-	public String getDebitUrl() {
-		return DebitUrl;
-	}
-
-	public void setDebitUrl(String debitUrl) {
-		DebitUrl = debitUrl;
-	}
-
-	public String getInitiateUrl() {
-		return InitiateUrl;
-	}
-
-	public void setInitiateUrl(String initiateUrl) {
-		InitiateUrl = initiateUrl;
-	}
-
-	public String getSuccessRedirectUrl() {
-		return successRedirectUrl;
-	}
-
-	public void setSuccessRedirectUrl(String successRedirectUrl) {
-		this.successRedirectUrl = successRedirectUrl;
-	}
-
-	public String getFailureRedirectUrl() {
-		return failureRedirectUrl;
-	}
-
-	public void setFailureRedirectUrl(String failureRedirectUrl) {
-		this.failureRedirectUrl = failureRedirectUrl;
-	}
-
-	public String getCallbackUrl() {
-		return callbackUrl;
-	}
-
-	public void setCallbackUrl(String callbackUrl) {
-		this.callbackUrl = callbackUrl;
-	}
-
-	public String getSubMerchantId() {
-		return subMerchantId;
-	}
-
-	public void setSubMerchantId(String subMerchantId) {
-		this.subMerchantId = subMerchantId;
 	}
 
 }

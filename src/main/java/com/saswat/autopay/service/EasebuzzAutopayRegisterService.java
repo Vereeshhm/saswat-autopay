@@ -3,7 +3,7 @@ package com.saswat.autopay.service;
 import org.springframework.http.ResponseEntity;
 
 import com.saswat.autopay.Utils.DebitAutopayRequestDto;
-import com.saswat.autopay.Utils.InitiateAutopayRequestDto;
+import com.saswat.autopay.model.InitiateAutopayRequestDto;
 
 public interface EasebuzzAutopayRegisterService {
 
