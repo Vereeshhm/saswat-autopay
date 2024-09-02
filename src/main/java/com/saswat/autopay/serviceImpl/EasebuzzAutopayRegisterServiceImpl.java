@@ -135,13 +135,13 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 				+ "&final_collection_date=" + initiateAutopayRequestDto.getFinal_collection_date() + "&request_flow="
 				+ initiateAutopayRequestDto.getRequest_flow();
 
-//		initiateAutopayRequestDto.setCustomer_authentication_id(customerAuthenticationId);
-//		initiateAutopayRequestDto.setSurl(config.getSurl());
-//		initiateAutopayRequestDto.setFurl(config.getFurl());
-//		initiateAutopayRequestDto.setTxnid(txnid);
-//		initiateAutopayRequestDto.setHash(hash);
-//		initiateAutopayRequestDto.setKey(config.getKey());
-//		initiateAutopayRepository.save(initiateAutopayRequestDto);
+		initiateAutopayRequestDto.setCustomer_authentication_id(customerAuthenticationId);
+		initiateAutopayRequestDto.setSurl(config.getSurl());
+		initiateAutopayRequestDto.setFurl(config.getFurl());
+		initiateAutopayRequestDto.setTxnid(txnid);
+		initiateAutopayRequestDto.setHash(hash);
+		initiateAutopayRequestDto.setKey(config.getKey());
+		initiateAutopayRepository.save(initiateAutopayRequestDto);
 
 		String response1;
 		HttpURLConnection connection = null;
