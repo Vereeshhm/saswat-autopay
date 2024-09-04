@@ -1,5 +1,8 @@
 package com.saswat.autopay.model;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -95,6 +98,73 @@ public class InitiateAutopayRequestDto {
 	@JsonProperty("sub_merchant_id")
 	@Column(name = "sub_merchant_id")
 	private String sub_merchant_id;
+	
+	
+	@Column(name="created_date")
+	private LocalDateTime created_date=LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+	
+	@Column(name="status")
+	private int status;
+
+	@Column(name="created_by")
+	private String created_by="Admin";
+	
+	@Column(name="data")
+	private String data;
+	
+	@Column(name="access_key")
+	private String access_key;
+	
+	@Column(name="status_mesg")
+	private String statusMesg;
+	
+	public String getStatusMesg() {
+		return statusMesg;
+	}
+
+	public void setStatusMesg(String statusMesg) {
+		this.statusMesg = statusMesg;
+	}
+
+	public String getData() {
+		return data;
+	}
+
+	public void setData(String data) {
+		this.data = data;
+	}
+
+	public String getAccess_key() {
+		return access_key;
+	}
+
+	public void setAccess_key(String access_key) {
+		this.access_key = access_key;
+	}
+
+	public LocalDateTime getCreated_date() {
+		return created_date;
+	}
+
+	public void setCreated_date(LocalDateTime created_date) {
+		this.created_date = created_date;
+	}
+
+	public int getStatus() {
+		return status;
+	}
+
+	public void setStatus(int status) {
+		this.status = status;
+	}
+
+	public String getCreated_by() {
+		return created_by;
+	}
+
+	public void setCreated_by(String created_by) {
+		this.created_by = created_by;
+	}
 
 	public String getSub_merchant_id() {
 		return sub_merchant_id;

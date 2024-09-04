@@ -1,5 +1,8 @@
 package com.saswat.autopay.model;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -32,6 +35,15 @@ public class Debitresponsedetails {
 	@Column(name = "merchant_debit_id")
 	@JsonProperty("merchant_debit_id")
 	private String merchant_debit_id;
+	
+	@Column(name="created_date")
+	private LocalDateTime created_date=LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+	
+	@Column(name="debit_status")
+	private String debitStatus;
+
+	@Column(name="created_by")
+	private String created_by="Admin";
 
 	public Long getId() {
 		return id;

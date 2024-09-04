@@ -1,7 +1,9 @@
 package com.saswat.autopay.model;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -156,6 +158,40 @@ public class Transactionstatus {
 
 	@JsonProperty("udf10")
 	private String udf10;
+	
+	
+	@Column(name="created_date")
+	private LocalDateTime created_date=LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+	
+	@Column(name="transaction_status")
+	private String transactionStatus;
+
+	@Column(name="created_by")
+	private String created_by="Admin";
+
+	public LocalDateTime getCreated_date() {
+		return created_date;
+	}
+
+	public void setCreated_date(LocalDateTime created_date) {
+		this.created_date = created_date;
+	}
+
+	public String getTransactionStatus() {
+		return transactionStatus;
+	}
+
+	public void setTransactionStatus(String transactionStatus) {
+		this.transactionStatus = transactionStatus;
+	}
+
+	public String getCreated_by() {
+		return created_by;
+	}
+
+	public void setCreated_by(String created_by) {
+		this.created_by = created_by;
+	}
 
 	public String getTxnid() {
 		return txnid;
@@ -539,6 +575,26 @@ public class Transactionstatus {
 
 	public void setUdf10(String udf10) {
 		this.udf10 = udf10;
+	}
+
+	@Override
+	public String toString() {
+		return "Transactionstatus [txnid=" + txnid + ", deductionPercentage=" + deductionPercentage
+				+ ", netAmountDebit=" + netAmountDebit + ", cardCategory=" + cardCategory + ", unmappedStatus="
+				+ unmappedStatus + ", addedOn=" + addedOn + ", autoDebitAuthError=" + autoDebitAuthError
+				+ ", cashBackPercentage=" + cashBackPercentage + ", bankRefNum=" + bankRefNum + ", errorMessage="
+				+ errorMessage + ", authorizationStatus=" + authorizationStatus + ", phone=" + phone + ", easepayid="
+				+ easepayid + ", cardNum=" + cardNum + ", autoDebitAccessKey=" + autoDebitAccessKey + ", upiVa=" + upiVa
+				+ ", paymentSource=" + paymentSource + ", cardType=" + cardType + ", mode=" + mode + ", error=" + error
+				+ ", bankCode=" + bankCode + ", nameOnCard=" + nameOnCard + ", bankName=" + bankName + ", issuingBank="
+				+ issuingBank + ", customerAuthenticationId=" + customerAuthenticationId + ", pgType=" + pgType
+				+ ", amount=" + amount + ", failureUrl=" + failureUrl + ", productInfo=" + productInfo + ", authCode="
+				+ authCode + ", email=" + email + ", status=" + status + ", hash=" + hash + ", firstname=" + firstname
+				+ ", successUrl=" + successUrl + ", autoDebitAuthMsg=" + autoDebitAuthMsg + ", key=" + key
+				+ ", merchantLogo=" + merchantLogo + ", udf1=" + udf1 + ", udf2=" + udf2 + ", udf3=" + udf3 + ", udf4="
+				+ udf4 + ", udf5=" + udf5 + ", udf6=" + udf6 + ", udf7=" + udf7 + ", udf8=" + udf8 + ", udf9=" + udf9
+				+ ", udf10=" + udf10 + ", created_date=" + created_date + ", transactionStatus=" + transactionStatus
+				+ ", created_by=" + created_by + "]";
 	}
 
 }
