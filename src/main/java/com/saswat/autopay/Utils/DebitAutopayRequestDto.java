@@ -31,6 +31,17 @@ public class DebitAutopayRequestDto {
 	private String merchant_debit_id;
 	@JsonProperty("auto_debit_access_key")
 	private String auto_debit_access_key;
+	@JsonProperty("sub_merchant_id")
+
+	private String sub_merchant_id;
+
+	public String getSub_merchant_id() {
+		return sub_merchant_id;
+	}
+
+	public void setSub_merchant_id(String sub_merchant_id) {
+		this.sub_merchant_id = sub_merchant_id;
+	}
 
 	public String getKey() {
 		return key;

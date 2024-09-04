@@ -81,7 +81,6 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 	public ResponseEntity<String> registerAutopay(InitiateAutopayRequestDto initiateAutopayRequestDto)
 			throws Exception {
 
-		// Prepare URL and transaction ID
 		String UrlString = config.getInitiatelinkurl();
 		String txnid = generateUniqueTransactionId();
 		String customerAuthenticationId = generateUniqueCustomerAuthenticationId();
@@ -129,11 +128,9 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 				+ initiateAutopayRequestDto.getAddress2() + "&city=" + initiateAutopayRequestDto.getCity() + "&state="
 				+ initiateAutopayRequestDto.getState() + "&country=" + initiateAutopayRequestDto.getCountry()
 				+ "&zipcode=" + initiateAutopayRequestDto.getZipcode() + "&customer_authentication_id="
-				+ customerAuthenticationId
-//				+"&show_payment_mode=" +initiateAutopayRequestDto.getShow_payment_mode()
+				+ customerAuthenticationId + "&sub_merchant_id=" + config.getSubmerchantid()
 
-				+ "&final_collection_date=" + initiateAutopayRequestDto.getFinal_collection_date() + "&request_flow="
-				+ initiateAutopayRequestDto.getRequest_flow();
+				+ "&final_collection_date=" + initiateAutopayRequestDto.getFinal_collection_date();
 
 		initiateAutopayRequestDto.setCustomer_authentication_id(customerAuthenticationId);
 		initiateAutopayRequestDto.setSurl(config.getSurl());
@@ -188,11 +185,22 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 					String paymentUrl = paymentBaseUrl + accessKey;
 
 					ObjectNode responseObject = mapper.createObjectNode();
+
 					responseObject.put("status", 1);
-					responseObject.put("paymentUrl", paymentUrl);
 					responseObject.put("txnid", txnid);
+					responseObject.put("amount", initiateAutopayRequestDto.getAmount());
+					responseObject.put("productinfo", initiateAutopayRequestDto.getProductinfo());
+					responseObject.put("firstname", initiateAutopayRequestDto.getFirstname());
+					responseObject.put("phone", initiateAutopayRequestDto.getPhone());
+					responseObject.put("email", initiateAutopayRequestDto.getEmail());
 					responseObject.put("customer_authentication_id", customerAuthenticationId);
+					responseObject.put("data", paymentUrl);
+					responseObject.put("finalCollectionDate", initiateAutopayRequestDto.getFinal_collection_date());
+					responseObject.put("maxAmount", initiateAutopayRequestDto.getMaxAmount());
+
 					responseObject.put("access_key", accessKey);
+
+					// TODO
 
 					logger.info("Response Body " + responseObject);
 					logApi(UrlString, urlParameters, responseObject.toString(), HttpStatus.OK);
@@ -312,7 +320,7 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 				+ "&customer_authentication_id=" + debitAutopayRequestDto.getCustomer_authentication_id()
 
 				+ "&merchant_debit_id=" + merchant_debit_id + "&auto_debit_access_key="
-				+ debitAutopayRequestDto.getAuto_debit_access_key();
+				+ debitAutopayRequestDto.getAuto_debit_access_key() + "&sub_merchant_id=" + config.getSubmerchantid();
 
 		String response1;
 		HttpURLConnection connection = null;

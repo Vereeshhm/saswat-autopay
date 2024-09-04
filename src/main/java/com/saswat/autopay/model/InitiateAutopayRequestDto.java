@@ -7,9 +7,8 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-
 @Entity
-@Table(name="initiate_autopay_details")
+@Table(name = "initiate_autopay_details")
 public class InitiateAutopayRequestDto {
 
 	@Id
@@ -93,28 +92,16 @@ public class InitiateAutopayRequestDto {
 	@Column(name = "max_amount")
 	private Float maxAmount;
 
-//	@JsonProperty("show_payment_mode")
-//	private String show_payment_mode;
-//
-//
-//
-//	public String getShow_payment_mode() {
-//		return show_payment_mode;
-//	}
-//
-//	public void setShow_payment_mode(String show_payment_mode) {
-//		this.show_payment_mode = show_payment_mode;
-//	}
-	
-	@JsonProperty("request_flow")
-	private String request_flow;
+	@JsonProperty("sub_merchant_id")
+	@Column(name = "sub_merchant_id")
+	private String sub_merchant_id;
 
-	public String getRequest_flow() {
-		return request_flow;
+	public String getSub_merchant_id() {
+		return sub_merchant_id;
 	}
 
-	public void setRequest_flow(String request_flow) {
-		this.request_flow = request_flow;
+	public void setSub_merchant_id(String sub_merchant_id) {
+		this.sub_merchant_id = sub_merchant_id;
 	}
 
 	public String getKey() {
@@ -317,8 +304,6 @@ public class InitiateAutopayRequestDto {
 		this.zipcode = zipcode;
 	}
 
-	
-
 	public Float getMaxAmount() {
 		return maxAmount;
 	}
@@ -338,5 +323,4 @@ public class InitiateAutopayRequestDto {
 				+ ", final_collection_date=" + final_collection_date + ", maxAmount=" + maxAmount + "]";
 	}
 
-	
 }

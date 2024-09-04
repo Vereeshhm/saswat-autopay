@@ -32,6 +32,19 @@ public class PropertiesConfig {
 	@Value("${InitiateEnachpay.Url}")
 	private String InitiateEnachpayUrl;
 
+	@Value("${sub_merchant_id}")
+	private String submerchantid;
+
+	
+	
+	public String getSubmerchantid() {
+		return submerchantid;
+	}
+
+	public void setSubmerchantid(String submerchantid) {
+		this.submerchantid = submerchantid;
+	}
+
 	public String getInitiateEnachpayUrl() {
 		return InitiateEnachpayUrl;
 	}
