@@ -86,6 +86,44 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 	public ResponseEntity<String> registerAutopay(InitiateAutopayRequestDto initiateAutopayRequestDto)
 			throws Exception {
 
+		String phone = initiateAutopayRequestDto.getPhone();
+		if (phone == null || !phone.matches("\\d{10}")) {
+			// Return a custom error response for invalid phone number
+			logger.warn("Phone number must be exactly 10 digits and contain only digits.");
+			return ResponseEntity.badRequest().body("Phone number must be exactly 10 digits and contain only digits.");
+		}
+
+		if (initiateAutopayRequestDto.getProductinfo() == null
+				|| initiateAutopayRequestDto.getProductinfo().isEmpty()) {
+			logger.warn("Productinfo is missing.");
+			return ResponseEntity.badRequest().body("Productinfo is a required field.");
+		}
+
+		// Required field validation
+		if (initiateAutopayRequestDto.getAddress1() == null || initiateAutopayRequestDto.getAddress1().isEmpty()) {
+			logger.warn("Address1 is missing.");
+			return ResponseEntity.badRequest().body("Address1 is a required field.");
+		}
+		if (initiateAutopayRequestDto.getAddress2() == null || initiateAutopayRequestDto.getAddress2().isEmpty()) {
+			logger.warn("Address2 is missing.");
+			return ResponseEntity.badRequest().body("Address2 is a required field.");
+		}
+		if (initiateAutopayRequestDto.getCity() == null || initiateAutopayRequestDto.getCity().isEmpty()) {
+			logger.warn("City is missing.");
+			return ResponseEntity.badRequest().body("City is a required field.");
+		}
+		if (initiateAutopayRequestDto.getState() == null || initiateAutopayRequestDto.getState().isEmpty()) {
+			logger.warn("State is missing.");
+			return ResponseEntity.badRequest().body("State is a required field.");
+		}
+		if (initiateAutopayRequestDto.getCountry() == null || initiateAutopayRequestDto.getCountry().isEmpty()) {
+			logger.warn("Country is missing.");
+			return ResponseEntity.badRequest().body("Country is a required field.");
+		}
+		if (initiateAutopayRequestDto.getZipcode() == null || initiateAutopayRequestDto.getZipcode().isEmpty()) {
+			logger.warn("Zipcode is missing.");
+			return ResponseEntity.badRequest().body("Zipcode is a required field.");
+		}
 		String UrlString = config.getInitiatelinkurl();
 		String txnid = generateUniqueTransactionId();
 		String customerAuthenticationId = generateUniqueCustomerAuthenticationId();
@@ -213,6 +251,7 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 					initiateAutopayRequestDto.setAccess_key(accessKey);
 					initiateAutopayRequestDto.setData(paymentUrl);
 					initiateAutopayRequestDto.setStatus(status);
+					initiateAutopayRequestDto.setErrorDesc("success");
 					initiateAutopayRepository.save(initiateAutopayRequestDto);
 
 					return ResponseEntity.status(responseCode).body(responseObject.toString());
@@ -232,6 +271,7 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 					initiateAutopayRequestDto.setAccess_key("NA");
 					initiateAutopayRequestDto.setData("NA");
 					initiateAutopayRequestDto.setStatus(0);
+					initiateAutopayRequestDto.setErrorDesc(errorDesc);
 					initiateAutopayRepository.save(initiateAutopayRequestDto);
 					return ResponseEntity.status(responseCode).body(errorResponse.toString());
 				}
@@ -271,6 +311,8 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 
 		if (!autopayEntityOpt.isPresent()) {
 			// Handle case where entity is not found
+
+			logger.warn("Records not found for the provided customer_authentication_id");
 			return ResponseEntity.status(HttpStatus.NOT_FOUND)
 					.body("Records not found for the provided customer_authentication_id");
 
@@ -404,6 +446,7 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 					debitrequestdetails.setTxnid(txnid);
 					debitrequestdetails.setMerchant_debit_id(merchant_debit_id);
 					debitrequestdetails.setDebitStatus("Success");
+					debitrequestdetails.setErrorDesc(data);
 
 					debitRequestRepository.save(debitrequestdetails);
 
@@ -425,6 +468,7 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 					debitrequestdetails.setData(data);
 					debitrequestdetails.setTxnid(txnid);
 					debitrequestdetails.setMerchant_debit_id(merchant_debit_id);
+					debitrequestdetails.setErrorDesc(errorDesc);
 					debitrequestdetails.setDebitStatus("Failure");
 
 					debitRequestRepository.save(debitrequestdetails);

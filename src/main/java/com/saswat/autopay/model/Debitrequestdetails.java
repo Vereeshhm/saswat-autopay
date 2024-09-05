@@ -69,6 +69,17 @@ public class Debitrequestdetails {
 	@Column(name = "max_amount")
 	private Float maxAmount;
 	
+	@Column(name="errorDesc")
+	private String errorDesc;
+	
+	public String getErrorDesc() {
+		return errorDesc;
+	}
+
+	public void setErrorDesc(String errorDesc) {
+		this.errorDesc = errorDesc;
+	}
+
 	public Float getMaxAmount() {
 		return maxAmount;
 	}

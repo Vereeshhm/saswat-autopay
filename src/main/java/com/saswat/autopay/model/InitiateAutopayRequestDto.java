@@ -7,6 +7,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -33,7 +35,9 @@ public class InitiateAutopayRequestDto {
 
 	@Column(name = "firstname")
 	private String firstname;
-
+	
+	@Size(min = 10, max = 10, message = "Phone number must be exactly 10 digits")
+	@Pattern(regexp = "\\d{10}", message = "Phone number must contain only digits")
 	@Column(name = "phone")
 	private String phone;
 
@@ -98,28 +102,36 @@ public class InitiateAutopayRequestDto {
 	@JsonProperty("sub_merchant_id")
 	@Column(name = "sub_merchant_id")
 	private String sub_merchant_id;
-	
-	
-	@Column(name="created_date")
-	private LocalDateTime created_date=LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
-	
-	@Column(name="status")
+
+	@Column(name = "created_date")
+	private LocalDateTime created_date = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+
+	@Column(name = "status")
 	private int status;
 
-	@Column(name="created_by")
-	private String created_by="Admin";
-	
-	@Column(name="data")
+	@Column(name = "created_by")
+	private String created_by = "Admin";
+
+	@Column(name = "data")
 	private String data;
-	
-	@Column(name="access_key")
+
+	@Column(name = "access_key")
 	private String access_key;
-	
-	@Column(name="status_mesg")
+
+	@Column(name = "status_mesg")
 	private String statusMesg;
 	
-	
-	
+	@Column(name="errorDesc")
+	private String errorDesc;
+
+	public String getErrorDesc() {
+		return errorDesc;
+	}
+
+	public void setErrorDesc(String errorDesc) {
+		this.errorDesc = errorDesc;
+	}
+
 	public String getStatusMesg() {
 		return statusMesg;
 	}
