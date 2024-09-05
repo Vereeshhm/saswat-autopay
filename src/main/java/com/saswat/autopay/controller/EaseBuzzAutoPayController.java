@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.saswat.autopay.Utils.DebitAutopayRequestDto;
-import com.saswat.autopay.Utils.InitiateEnachRequestDto;
+import com.saswat.autopay.dto.DebitAutopayRequestDto;
+import com.saswat.autopay.dto.InitiateEnachRequestDto;
 import com.saswat.autopay.model.InitiateAutopayRequestDto;
 import com.saswat.autopay.service.EasebuzzAutopayRegisterService;
 import com.saswat.autopay.service.EasebuzzEnachRegisterService;

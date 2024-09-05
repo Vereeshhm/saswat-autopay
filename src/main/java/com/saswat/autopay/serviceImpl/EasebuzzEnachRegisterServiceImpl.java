@@ -14,8 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.saswat.autopay.Utils.InitiateEnachRequestDto;
 import com.saswat.autopay.Utils.PropertiesConfig;
+import com.saswat.autopay.dto.InitiateEnachRequestDto;
 import com.saswat.autopay.service.EasebuzzEnachRegisterService;
 
 @Service

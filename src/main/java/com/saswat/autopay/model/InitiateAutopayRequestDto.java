@@ -118,6 +118,8 @@ public class InitiateAutopayRequestDto {
 	@Column(name="status_mesg")
 	private String statusMesg;
 	
+	
+	
 	public String getStatusMesg() {
 		return statusMesg;
 	}

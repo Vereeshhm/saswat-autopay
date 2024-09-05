@@ -32,13 +32,13 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.saswat.autopay.Utils.DebitAutopayRequestDto;
 import com.saswat.autopay.Utils.PropertiesConfig;
+import com.saswat.autopay.dto.DebitAutopayRequestDto;
 import com.saswat.autopay.model.AutopayApiLog;
-import com.saswat.autopay.model.Debitresponsedetails;
+import com.saswat.autopay.model.Debitrequestdetails;
 import com.saswat.autopay.model.InitiateAutopayRequestDto;
 import com.saswat.autopay.repository.AutopayApilogrepository;
-import com.saswat.autopay.repository.DebitResponseRepository;
+import com.saswat.autopay.repository.DebitRequestRepository;
 import com.saswat.autopay.repository.InitiateAutopayRepository;
 import com.saswat.autopay.service.EasebuzzAutopayRegisterService;
 
@@ -55,7 +55,7 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 	InitiateAutopayRepository initiateAutopayRepository;
 
 	@Autowired
-	DebitResponseRepository debitResponseRepository;
+	DebitRequestRepository debitRequestRepository;
 
 	private Key secretKey;
 
@@ -78,7 +78,8 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 		apiLog.setStatus(statusmsg);
 		autopayapilogrepository.save(apiLog);
 
-		logger.info("API: {}, Status: {}, Request: {}, Response: {}", url, status.value(), requestBody, responseBody);
+		logger.info("API: {}, Status: {}, Request: {}, Response: {}", url, status.value(), requestBody, responseBody,
+				statusmsg, apiType);
 	}
 
 	@Override
@@ -145,8 +146,6 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 		initiateAutopayRequestDto.setSub_merchant_id(config.getSubmerchantid());
 		initiateAutopayRequestDto.setCreated_by("Admin");
 		initiateAutopayRequestDto.setCreated_date(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
-
-		// initiateAutopayRepository.save(initiateAutopayRequestDto);
 
 		String response1;
 		HttpURLConnection connection = null;
@@ -273,7 +272,8 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 		if (!autopayEntityOpt.isPresent()) {
 			// Handle case where entity is not found
 			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-					.body("Entity not found for the provided customer_authentication_id");
+					.body("Records not found for the provided customer_authentication_id");
+
 		}
 
 		// Extract the entity from Optional
@@ -340,6 +340,19 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 				+ "&merchant_debit_id=" + merchant_debit_id + "&auto_debit_access_key="
 				+ debitAutopayRequestDto.getAuto_debit_access_key() + "&sub_merchant_id=" + config.getSubmerchantid();
 
+		Debitrequestdetails debitrequestdetails = new Debitrequestdetails();
+
+		debitrequestdetails.setCustomer_authentication_id(debitAutopayRequestDto.getCustomer_authentication_id());
+		debitrequestdetails.setFirstname(debitAutopayRequestDto.getFirstname());
+		debitrequestdetails.setEmail(debitAutopayRequestDto.getEmail());
+		debitrequestdetails.setPhone(debitAutopayRequestDto.getPhone());
+		debitrequestdetails.setProductinfo(debitAutopayRequestDto.getProductinfo());
+		debitrequestdetails.setCreated_by("Admin");
+		debitrequestdetails.setCreated_date(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
+		debitrequestdetails.setAuto_debit_access_key(debitAutopayRequestDto.getAuto_debit_access_key());
+		debitrequestdetails.setHash(hash);
+		debitrequestdetails.setMaxAmount(autopayEntity.getMaxAmount());
+
 		String response1;
 		HttpURLConnection connection = null;
 
@@ -386,14 +399,13 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 					responseObject.put("txnid", txnid);
 					responseObject.put("merchant_debit_id", merchant_debit_id);
 
-					Debitresponsedetails debitresponsedetails = new Debitresponsedetails();
+					debitrequestdetails.setStatus(status);
+					debitrequestdetails.setData(data);
+					debitrequestdetails.setTxnid(txnid);
+					debitrequestdetails.setMerchant_debit_id(merchant_debit_id);
+					debitrequestdetails.setDebitStatus("Success");
 
-					debitresponsedetails.setStatus(status);
-					debitresponsedetails.setData(data);
-					debitresponsedetails.setTxnid(txnid);
-					debitresponsedetails.setMerchant_debit_id(merchant_debit_id);
-
-					debitResponseRepository.save(debitresponsedetails);
+					debitRequestRepository.save(debitrequestdetails);
 
 					logger.info("Response Body " + responseObject);
 					logApi(UrlString, urlParameters, responseObject.toString(), HttpStatus.OK, "Success",
@@ -409,6 +421,13 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 					errorResponse.put("status", 0);
 					errorResponse.put("error_desc", errorDesc);
 					errorResponse.put("data", data1);
+					debitrequestdetails.setStatus(status);
+					debitrequestdetails.setData(data);
+					debitrequestdetails.setTxnid(txnid);
+					debitrequestdetails.setMerchant_debit_id(merchant_debit_id);
+					debitrequestdetails.setDebitStatus("Failure");
+
+					debitRequestRepository.save(debitrequestdetails);
 					logApi(UrlString, urlParameters, errorResponse.toString(), HttpStatus.OK, "Failure",
 							"DebitRequest");
 					return ResponseEntity.status(responseCode).body(errorResponse.toString());
