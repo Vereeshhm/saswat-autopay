@@ -1,12 +1,17 @@
 package com.saswat.autopay.controller;
 
+import java.security.NoSuchAlgorithmException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.saswat.autopay.dto.CancelMandateDto;
 import com.saswat.autopay.dto.DebitAutopayRequestDto;
 import com.saswat.autopay.dto.InitiateEnachRequestDto;
 import com.saswat.autopay.model.InitiateAutopayRequestDto;
@@ -36,6 +41,13 @@ public class EaseBuzzAutoPayController {
 
 		return easebuzzautopayservice.debitRequest(debitAutopayRequestDto);
 	}
+	
+	@PostMapping("/v1/payment/autodebit/mandatecancellation")
+	public ResponseEntity<String> CancelMandate(@RequestBody CancelMandateDto cancelMandateDto) throws NoSuchAlgorithmException, JsonProcessingException{
+		
+		return easebuzzautopayservice.cancelMandate(cancelMandateDto);
+	}
+	
 
 	@PostMapping("/v1/payment/enach/initiate")
 	public ResponseEntity<String> InitiatePay(@ModelAttribute InitiateEnachRequestDto initiateEnachRequestDto)
@@ -43,5 +55,8 @@ public class EaseBuzzAutoPayController {
 
 		return easebuzzEnachRegisterService.registerEnach(initiateEnachRequestDto);
 	}
+	
+	
+	
 
 }

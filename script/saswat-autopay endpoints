@@ -1,0 +1,146 @@
+1.Initiate mandate api : https://98.70.77.51:8083/autopay/api/saswat/v1/payment/initiate
+
+
+RequestBody :
+
+amount:1.0
+productinfo:saswatloan
+firstname:veresh
+phone:9880418761
+email:hmvereesh@gmail.com
+udf1:HOD12321424
+maxAmount:10.00
+address1:jp nagar
+address2:bangalore
+city:bangalore
+state:karnataka
+country:India
+zipcode:584001
+final_collection_date:31/12/2024
+
+
+ResponseBody :
+
+{
+    "status": 1,
+    "txnid": "MXvojcydCYPz9ZufV7SfQyWSVmGBWZam",
+    "amount": 1.0,
+    "productinfo": "saswatloan",
+    "firstname": "veresh",
+    "phone": "9880418761",
+    "email": "hmvereesh@gmail.com",
+    "customer_authentication_id": "ufTuqcvsmRnmYJc6Nwlk4efaJIPoxcfS",
+    "data": "https://testpay.easebuzz.in/pay/966ea8270094d35bb8f59e15e8472af2bd33305f61858535bd53198e4c4b857f",
+    "finalCollectionDate": "31/12/2024",
+    "maxAmount": 10.0,
+    "access_key": "966ea8270094d35bb8f59e15e8472af2bd33305f61858535bd53198e4c4b857f"
+}
+
+
+#===========================================================
+
+
+
+2.Transaction status api: https://98.70.77.51:8083/autopay/api/status/v1/transaction
+
+RequestBody:
+
+{
+    "txnid": "hJtLFYLE7gLxTtF4TwbwJ1SXm8l45RlF"
+}
+
+
+ResponseBody :
+
+{
+    "created_date": "2024-09-05T11:35:15",
+    "transactionStatus": null,
+    "created_by": "Admin",
+    "txnid": "hJtLFYLE7gLxTtF4TwbwJ1SXm8l45RlF",
+    "deduction_percentage": 0.0,
+    "net_amount_debit": 0.0,
+    "cardCategory": "NA",
+    "unmappedstatus": "NA",
+    "addedon": "2024-09-05T11:35:15",
+    "auto_debit_auth_error": "NA",
+    "cash_back_percentage": 50.0,
+    "bank_ref_num": "091102728731",
+    "error_Message": "Transaction is successful.",
+    "authorization_status": "authorized",
+    "phone": "9880418761",
+    "easepayid": "S240905073TYBR",
+    "cardnum": "NA",
+    "auto_debit_access_key": "2a84b3d7-c789-402a-af0a-87e3e99de282",
+    "upi_va": "success@easebuzz",
+    "payment_source": "Easebuzz",
+    "card_type": "UPIAD",
+    "mode": "NA",
+    "error": "Transaction is successful.",
+    "bankcode": "NA",
+    "name_on_card": "NA",
+    "bank_name": "NA",
+    "issuing_bank": "NA",
+    "customer_authentication_id": "0UItj1JfctUnbVug42vwYZSKolS9K7K2",
+    "PG_TYPE": "NA",
+    "amount": 1.0,
+    "furl": "https://localhost:8081/autopay/api/status/v1/failure-redirect",
+    "productinfo": "saswatloan",
+    "auth_code": "",
+    "email": "hmvereesh@gmail.com",
+    "status": "success",
+    "hash": "9531e63d905fcfe8e512c21404622bf00d868ac2960f65ec1d5642fd7b4ca6f84a5064bbbf684261486426636ac60a63258ca509f3cf89441e9b750c265dc0db",
+    "firstname": "veresh",
+    "surl": "https://localhost:8081/autopay/api/status/v1/success-redirect",
+    "auto_debit_auth_msg": "Authorization amount will be refunded in 5 to 7 working days",
+    "key": "5OEKXZESM",
+    "merchant_logo": "NA",
+    "udf1": "HOD12321424",
+    "udf2": "NA",
+    "udf3": "NA",
+    "udf4": "NA",
+    "udf5": 10.0,
+    "udf6": "NA",
+    "udf7": "NA",
+    "udf8": "",
+    "udf9": "",
+    "udf10": ""
+}
+#========================
+
+3.Debitrequest : https://98.70.77.51:8083/autopay/api/saswat/v1/payment/debitRequest
+
+
+RequestBody:
+
+amount:1.0
+customer_authentication_id:cfGVQzsT9WMkYEMCEt2fVZsJJx0j02Us
+auto_debit_access_key:2a84b3d7-c789-402a-af0a-87e3e99de282
+
+
+ResponseBody :
+
+{
+"status":1,"data":"Auto debit request accepted successfully",
+"txnid":"qyChLmJ6YcuFSWMsEjNcX8xrm538n6ki",
+"merchant_debit_id":"oAqHupul0GFf2CJdLsXB3C7a2S4QCuWv"
+}
+
+
+#========================
+
+4.Cancel mandate : https://98.70.77.51:8083/autopay/api/saswat/v1/payment/autodebit/mandatecancellation
+
+RequestBody :
+
+{
+    "easebuzz_id": "S240906073TZLD",
+    "customer_authentication_id": "ufTuqcvsmRnmYJc6Nwlk4efaJIPoxcfS",
+    "auto_debit_access_key": "775f1421-86ec-4bfd-814d-94d1f140001d"
+}
+
+ResponseBody:
+
+{
+ status:true
+ data:Auto debit authorization canceled successfully
+ }

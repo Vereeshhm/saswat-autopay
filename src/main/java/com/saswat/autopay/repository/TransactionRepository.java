@@ -12,7 +12,7 @@ public interface TransactionRepository extends JpaRepository<Transactionstatus, 
 
 	Optional<Transactionstatus> findByTxnid(String txnid);
 
-//	Optional<Transactionstatus> findByCustomerAuthenticationId(String customer_authentication_id);
+	Optional<Transactionstatus> findByCustomerAuthenticationId(String customer_authentication_id);
 
 
 

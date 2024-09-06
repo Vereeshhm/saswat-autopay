@@ -28,15 +28,24 @@ public class PropertiesConfig {
 
 	@Value("${DebitRequest.url}")
 	private String DebitRequesturl;
-	
+
+	@Value("${CancelMandate.url}")
+	private String CancelMandateurl;
+
+	public String getCancelMandateurl() {
+		return CancelMandateurl;
+	}
+
+	public void setCancelMandateurl(String cancelMandateurl) {
+		CancelMandateurl = cancelMandateurl;
+	}
+
 	@Value("${InitiateEnachpay.Url}")
 	private String InitiateEnachpayUrl;
 
 	@Value("${sub_merchant_id}")
 	private String submerchantid;
 
-	
-	
 	public String getSubmerchantid() {
 		return submerchantid;
 	}

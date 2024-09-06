@@ -28,19 +28,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.saswat.autopay.Utils.PropertiesConfig;
+import com.saswat.autopay.dto.CancelMandateDto;
 import com.saswat.autopay.dto.DebitAutopayRequestDto;
 import com.saswat.autopay.model.AutopayApiLog;
+import com.saswat.autopay.model.Cancelmandatedetails;
 import com.saswat.autopay.model.Debitrequestdetails;
 import com.saswat.autopay.model.InitiateAutopayRequestDto;
 import com.saswat.autopay.repository.AutopayApilogrepository;
+import com.saswat.autopay.repository.CancelMandatedetailsrepository;
 import com.saswat.autopay.repository.DebitRequestRepository;
 import com.saswat.autopay.repository.InitiateAutopayRepository;
+import com.saswat.autopay.repository.TransactionRepository;
 import com.saswat.autopay.service.EasebuzzAutopayRegisterService;
+
+import net.minidev.json.JSONObject;
 
 @Service
 public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegisterService {
@@ -56,10 +64,14 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 
 	@Autowired
 	DebitRequestRepository debitRequestRepository;
-	
-	
-//	@Autowired
-//	TransactionRepository transactionRepository;
+
+	@Autowired
+	TransactionRepository transactionRepository;
+	@Autowired
+	CancelMandatedetailsrepository cancelMandatedetailsrepository;
+
+	@Autowired
+	RestTemplate restTemplate;
 	private Key secretKey;
 
 	private static final Logger logger = LoggerFactory.getLogger(EasebuzzAutopayRegisterServiceImpl.class);
@@ -351,8 +363,6 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 		debitAutopayRequestDto.setCountry(autopayEntity.getCountry());
 		debitAutopayRequestDto.setZipcode(autopayEntity.getZipcode());
 
-
-
 		String UrlString = config.getDebitRequesturl();
 		String txnid = generateUniqueTransactionId();
 
@@ -398,8 +408,8 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 
 				+ "&customer_authentication_id=" + debitAutopayRequestDto.getCustomer_authentication_id()
 
-				+ "&merchant_debit_id=" + merchant_debit_id + "&auto_debit_access_key=" + debitAutopayRequestDto.getAuto_debit_access_key()
-				+ "&sub_merchant_id=" + config.getSubmerchantid();
+				+ "&merchant_debit_id=" + merchant_debit_id + "&auto_debit_access_key="
+				+ debitAutopayRequestDto.getAuto_debit_access_key() + "&sub_merchant_id=" + config.getSubmerchantid();
 
 		Debitrequestdetails debitrequestdetails = new Debitrequestdetails();
 
@@ -512,6 +522,163 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 		} catch (IOException e) {
 			response1 = e.getMessage();
 			logApi(UrlString, urlParameters, response1, HttpStatus.INTERNAL_SERVER_ERROR, "Error", "DebitRequest");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response1);
+		} finally {
+			if (connection != null) {
+				connection.disconnect();
+			}
+		}
+
+	}
+
+	@Override
+	public ResponseEntity<String> cancelMandate(CancelMandateDto cancelMandateDto)
+			throws NoSuchAlgorithmException, JsonProcessingException {
+
+		String UrlString = config.getCancelMandateurl();
+
+		// Construct the hash string
+		String hashString = config.getKey() + "|" + cancelMandateDto.getEasebuzz_id() + "|"
+				+ cancelMandateDto.getAuto_debit_access_key() + "|" + cancelMandateDto.getCustomer_authentication_id()
+				+ "|" + config.getSalt();
+
+		logger.info("Final Hash String before hashing: {}", hashString);
+
+		// Generate the hash
+		String hash = generateHash(hashString);
+
+		logger.info("Generated Hash: {}", hash);
+
+		JSONObject json = new JSONObject();
+		json.put("key", config.getKey());
+		json.put("easebuzz_id", cancelMandateDto.getEasebuzz_id());
+		json.put("customer_authentication_id", cancelMandateDto.getCustomer_authentication_id());
+		json.put("auto_debit_access_key", cancelMandateDto.getAuto_debit_access_key());
+		json.put("hash", hash);
+
+		// Convert JSON object to string
+		String jsonRequestBody = json.toString();
+
+		String response1;
+		HttpURLConnection connection = null;
+
+		try {
+			// Send POST request
+			URL url = new URL(UrlString);
+			connection = (HttpURLConnection) url.openConnection();
+			connection.setRequestMethod("POST");
+			connection.setRequestProperty("Content-Type", "application/json");
+			connection.setDoOutput(true);
+
+			logger.info("Request Url " + config.getCancelMandateurl());
+			logger.info("Request Body " + jsonRequestBody);
+
+			try (DataOutputStream wr = new DataOutputStream(connection.getOutputStream())) {
+
+				wr.writeBytes(jsonRequestBody);
+				wr.flush();
+			}
+
+			int responseCode = connection.getResponseCode();
+			logger.info("Response Code " + responseCode);
+
+			StringBuilder response = new StringBuilder();
+			if (responseCode == HttpURLConnection.HTTP_OK) {
+				try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+					String inputLine;
+					while ((inputLine = in.readLine()) != null) {
+						response.append(inputLine);
+					}
+				}
+				response1 = response.toString();
+
+				ObjectMapper objectMapper = new ObjectMapper();
+				JsonNode jsonResponse = objectMapper.readTree(response1);
+				Cancelmandatedetails cancelMandateDetails = new Cancelmandatedetails();
+
+				cancelMandateDetails.setAuto_debit_access_key(cancelMandateDto.getAuto_debit_access_key());
+				cancelMandateDetails.setHash(hash);
+				cancelMandateDetails.setEasebuzz_id(cancelMandateDto.getEasebuzz_id());
+				cancelMandateDetails.setKey(config.getKey());
+				cancelMandateDetails.setCustomer_authentication_id(cancelMandateDto.getCustomer_authentication_id());
+
+				cancelMandatedetailsrepository.save(cancelMandateDetails);
+				if (jsonResponse.has("status") && jsonResponse.get("status").asBoolean()) {
+
+					cancelMandateDetails.setStatus(true);
+					if (jsonResponse.has("data")) {
+						String dataMessage = jsonResponse.get("data").asText();
+						cancelMandateDetails.setData(dataMessage);
+						logger.info("Success response data: {}", dataMessage);
+					}
+
+					if (jsonResponse.has("message")) {
+						String message = jsonResponse.get("message").asText();
+						cancelMandateDetails.setMessage(message);
+						logger.info("Success response message: {}", message);
+					}
+
+				} else {
+
+					cancelMandateDetails.setStatus(false);
+
+					if (jsonResponse.has("message")) {
+						String message = jsonResponse.get("message").asText();
+						cancelMandateDetails.setMessage(message);
+						logger.info("Error response message: {}", message);
+					}
+				}
+
+				cancelMandatedetailsrepository.save(cancelMandateDetails);
+				logApi(UrlString, jsonRequestBody, response1, HttpStatus.OK, "Success", "Cancelmandate");
+				return ResponseEntity.ok(response1);
+			} else {
+				try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getErrorStream()))) {
+					String inputLine;
+					while ((inputLine = in.readLine()) != null) {
+						response.append(inputLine);
+					}
+				}
+				response1 = response.toString();
+				logApi(UrlString, jsonRequestBody, response1, HttpStatus.OK, "Failure", "Cancelmandate");
+				logger.error("Error Response Body: {}", response1);
+
+				Cancelmandatedetails cancelMandateDetails = new Cancelmandatedetails();
+				cancelMandateDetails.setStatus(false);
+				String customerAuthId = cancelMandateDto.getCustomer_authentication_id();
+				String autoDebitAccessKey = cancelMandateDto.getAuto_debit_access_key();
+
+				cancelMandateDetails.setAuto_debit_access_key(autoDebitAccessKey);
+				cancelMandateDetails.setCustomer_authentication_id(customerAuthId);
+
+				
+				logger.info("Setting auto_debit_access_key: {}", autoDebitAccessKey);
+				logger.info("Setting customer_authentication_id: {}", customerAuthId);
+
+				logger.info("fetched customer auth id" + cancelMandateDto.getCustomer_authentication_id());
+
+				if (response1.contains("error_desc")) {
+					try {
+						ObjectMapper objectMapper = new ObjectMapper();
+						JsonNode jsonResponse = objectMapper.readTree(response1);
+						if (jsonResponse.has("error_desc")) {
+							String errorMessage = jsonResponse.get("error_desc").asText();
+
+							logger.info("Error desc: {}", errorMessage);
+							cancelMandateDetails.setError_desc(errorMessage);
+						}
+					} catch (JsonProcessingException e) {
+						logger.error("Error processing JSON response: {}", e.getMessage());
+					}
+				}
+
+				cancelMandatedetailsrepository.save(cancelMandateDetails);
+				return ResponseEntity.status(responseCode).body(response1);
+			}
+
+		} catch (IOException e) {
+			response1 = e.getMessage();
+			logApi(UrlString, jsonRequestBody, response1, HttpStatus.INTERNAL_SERVER_ERROR, "Error", "Cancelmandate");
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response1);
 		} finally {
 			if (connection != null) {

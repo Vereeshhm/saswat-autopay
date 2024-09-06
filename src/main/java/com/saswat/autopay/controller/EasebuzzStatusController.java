@@ -29,7 +29,7 @@ public class EasebuzzStatusController {
 
 	@Autowired
 	TransactionRepository transactionRepository;
-	
+
 	@Autowired
 	AutopayApilogrepository apilogrepository;
 
@@ -253,11 +253,11 @@ public class EasebuzzStatusController {
 
 		String txnid = requestBody.get("txnid");
 		Optional<Transactionstatus> transaction = transactionRepository.findByTxnid(txnid);
-		AutopayApiLog apiLog=new AutopayApiLog();
+		AutopayApiLog apiLog = new AutopayApiLog();
 		if (transaction.isPresent()) {
-			
+
 			apiLog.setRequestBody(txnid);
-			
+
 			apiLog.setUrl("autopay/api/status/v1/transaction");
 			apiLog.setResponseBody(transaction.toString());
 			apiLog.setApiType("Transaction");
