@@ -48,6 +48,7 @@ import com.saswat.autopay.repository.InitiateAutopayRepository;
 import com.saswat.autopay.repository.TransactionRepository;
 import com.saswat.autopay.service.EasebuzzAutopayRegisterService;
 
+
 import net.minidev.json.JSONObject;
 
 @Service
@@ -98,8 +99,28 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 	}
 
 	@Override
-	public ResponseEntity<String> registerAutopay(InitiateAutopayRequestDto initiateAutopayRequestDto)
+	public ResponseEntity<String> registerAutopay(com.saswat.autopay.dto.RegisterAutopayRequestDto registerAutopayRequestDto)
 			throws Exception {
+		
+		InitiateAutopayRequestDto initiateAutopayRequestDto=new InitiateAutopayRequestDto();
+		
+		initiateAutopayRequestDto.setAmount(registerAutopayRequestDto.getAmount());
+		initiateAutopayRequestDto.setProductinfo(registerAutopayRequestDto.getProductinfo());
+		initiateAutopayRequestDto.setFirstname(registerAutopayRequestDto.getFirstname());
+		initiateAutopayRequestDto.setPhone(registerAutopayRequestDto.getPhone());
+		initiateAutopayRequestDto.setEmail(registerAutopayRequestDto.getEmail());
+		initiateAutopayRequestDto.setUdf1(registerAutopayRequestDto.getUdf1());
+		initiateAutopayRequestDto.setMaxAmount(registerAutopayRequestDto.getMaxAmount());
+		initiateAutopayRequestDto.setAddress1(registerAutopayRequestDto.getAddress1());
+		initiateAutopayRequestDto.setAddress2(registerAutopayRequestDto.getAddress1());
+		initiateAutopayRequestDto.setCity(registerAutopayRequestDto.getCity());
+		initiateAutopayRequestDto.setState(registerAutopayRequestDto.getState());
+		initiateAutopayRequestDto.setCountry(registerAutopayRequestDto.getCountry());
+		initiateAutopayRequestDto.setZipcode(registerAutopayRequestDto.getZipcode());
+		initiateAutopayRequestDto.setFinal_collection_date(registerAutopayRequestDto.getFinal_collection_date());
+		initiateAutopayRequestDto.setShow_payment_mode("UPI");
+		
+		
 
 		String UrlString = config.getInitiatelinkurl();
 		String txnid = generateUniqueTransactionId();

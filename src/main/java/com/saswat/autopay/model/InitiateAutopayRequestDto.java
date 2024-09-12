@@ -123,6 +123,8 @@ public class InitiateAutopayRequestDto {
 	
 	@Column(name="errorDesc")
 	private String errorDesc;
+	
+	private String show_payment_mode;
 
 	public String getErrorDesc() {
 		return errorDesc;
@@ -394,6 +396,16 @@ public class InitiateAutopayRequestDto {
 
 	public void setMaxAmount(Float maxAmount) {
 		this.maxAmount = maxAmount;
+	}
+	
+	
+
+	public String getShow_payment_mode() {
+		return show_payment_mode;
+	}
+
+	public void setShow_payment_mode(String show_payment_mode) {
+		this.show_payment_mode = show_payment_mode;
 	}
 
 	@Override
