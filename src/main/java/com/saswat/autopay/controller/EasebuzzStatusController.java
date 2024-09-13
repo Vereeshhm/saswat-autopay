@@ -3,12 +3,10 @@ package com.saswat.autopay.controller;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.saswat.autopay.model.AutopayApiLog;
 import com.saswat.autopay.model.Transactionstatus;
 import com.saswat.autopay.repository.AutopayApilogrepository;
 import com.saswat.autopay.repository.TransactionRepository;
@@ -248,38 +245,38 @@ public class EasebuzzStatusController {
 		return ResponseEntity.ok("Payment has failed");
 	}
 
-	@PostMapping("/v1/transaction")
-	public ResponseEntity<Transactionstatus> getTransactionById(@RequestBody Map<String, String> requestBody) {
-
-		String txnid = requestBody.get("txnid");
-		Optional<Transactionstatus> transaction = transactionRepository.findByTxnid(txnid);
-		AutopayApiLog apiLog = new AutopayApiLog();
-		if (transaction.isPresent()) {
-
-			apiLog.setRequestBody(txnid);
-
-			apiLog.setUrl("autopay/api/status/v1/transaction");
-			apiLog.setResponseBody(transaction.toString());
-			apiLog.setApiType("Transaction");
-			apiLog.setCreated_date(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
-			apiLog.setStatus("Success");
-			apiLog.setCreated_by("Admin");
-			apiLog.setStatusCode(1);
-			apilogrepository.save(apiLog);
-			return ResponseEntity.ok(transaction.get());
-		} else {
-			apiLog.setRequestBody(txnid);
-			apiLog.setUrl("autopay/api/status/v1/transaction");
-			apiLog.setResponseBody(transaction.toString());
-			apiLog.setApiType("Transaction");
-			apiLog.setCreated_date(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
-			apiLog.setStatus("Failure");
-			apiLog.setCreated_by("Admin");
-			apiLog.setStatusCode(0);
-			apilogrepository.save(apiLog);
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-		}
-	}
+//	@PostMapping("/v1/transaction")
+//	public ResponseEntity<Transactionstatus> getTransactionById(@RequestBody Map<String, String> requestBody) {
+//
+//		String txnid = requestBody.get("txnid");
+//		Optional<Transactionstatus> transaction = transactionRepository.findByTxnid(txnid);
+//		AutopayApiLog apiLog = new AutopayApiLog();
+//		if (transaction.isPresent()) {
+//
+//			apiLog.setRequestBody(txnid);
+//
+//			apiLog.setUrl("autopay/api/status/v1/transaction");
+//			apiLog.setResponseBody(transaction.toString());
+//			apiLog.setApiType("Transaction");
+//			apiLog.setCreated_date(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
+//			apiLog.setStatus("Success");
+//			apiLog.setCreated_by("Admin");
+//			apiLog.setStatusCode(1);
+//			apilogrepository.save(apiLog);
+//			return ResponseEntity.ok(transaction.get());
+//		} else {
+//			apiLog.setRequestBody(txnid);
+//			apiLog.setUrl("autopay/api/status/v1/transaction");
+//			apiLog.setResponseBody(transaction.toString());
+//			apiLog.setApiType("Transaction");
+//			apiLog.setCreated_date(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
+//			apiLog.setStatus("Failure");
+//			apiLog.setCreated_by("Admin");
+//			apiLog.setStatusCode(0);
+//			apilogrepository.save(apiLog);
+//			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+//		}
+//	}
 
 	@PostMapping("/v1/callback")
 	public String callbackURL(@RequestBody(required = false) String str) {

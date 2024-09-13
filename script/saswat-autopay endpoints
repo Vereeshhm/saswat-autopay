@@ -3,20 +3,22 @@
 
 RequestBody :
 
-amount:1.0
-productinfo:saswatloan
-firstname:veresh
-phone:9880418761
-email:hmvereesh@gmail.com
-udf1:HOD12321424
-maxAmount:10.00
-address1:jp nagar
-address2:bangalore
-city:bangalore
-state:karnataka
-country:India
-zipcode:584001
-final_collection_date:31/12/2024
+{
+    "amount": "1.0",
+    "productinfo": "saswatloan",
+    "firstname": "anuj",
+    "phone": "8792140219",
+    "email": "hmvereesh@gmail.com",
+    "udf1": "HOD12321424",
+    "maxAmount": "10.0",
+    "address1": "jp nagar",
+    "address2": "bangalore",
+    "city": "bangalore",
+    "state": "karnataka",
+    "country": "India",
+    "zipcode": "584001",
+    "final_collection_date": "31/12/2024"
+}
 
 
 ResponseBody :
@@ -41,7 +43,7 @@ ResponseBody :
 
 
 
-2.Transaction status api: https://98.70.77.51:8083/autopay/api/status/v1/transaction
+2.Transaction status api: https://98.70.77.51:8083/autopay/api/saswat/v1/payment/transaction/retrieve
 
 RequestBody:
 
@@ -51,59 +53,56 @@ RequestBody:
 
 
 ResponseBody :
-
 {
-    "created_date": "2024-09-05T11:35:15",
-    "transactionStatus": null,
-    "created_by": "Admin",
-    "txnid": "hJtLFYLE7gLxTtF4TwbwJ1SXm8l45RlF",
-    "deduction_percentage": 0.0,
-    "net_amount_debit": 0.0,
-    "cardCategory": "NA",
-    "unmappedstatus": "NA",
-    "addedon": "2024-09-05T11:35:15",
-    "auto_debit_auth_error": "NA",
-    "cash_back_percentage": 50.0,
-    "bank_ref_num": "091102728731",
-    "error_Message": "Transaction is successful.",
-    "authorization_status": "authorized",
-    "phone": "9880418761",
-    "easepayid": "S240905073TYBR",
-    "cardnum": "NA",
-    "auto_debit_access_key": "2a84b3d7-c789-402a-af0a-87e3e99de282",
-    "upi_va": "success@easebuzz",
-    "payment_source": "Easebuzz",
-    "card_type": "UPIAD",
-    "mode": "NA",
-    "error": "Transaction is successful.",
-    "bankcode": "NA",
-    "name_on_card": "NA",
-    "bank_name": "NA",
-    "issuing_bank": "NA",
-    "customer_authentication_id": "0UItj1JfctUnbVug42vwYZSKolS9K7K2",
-    "PG_TYPE": "NA",
-    "amount": 1.0,
-    "furl": "https://localhost:8081/autopay/api/status/v1/failure-redirect",
-    "productinfo": "saswatloan",
-    "auth_code": "",
-    "email": "hmvereesh@gmail.com",
-    "status": "success",
-    "hash": "9531e63d905fcfe8e512c21404622bf00d868ac2960f65ec1d5642fd7b4ca6f84a5064bbbf684261486426636ac60a63258ca509f3cf89441e9b750c265dc0db",
-    "firstname": "veresh",
-    "surl": "https://localhost:8081/autopay/api/status/v1/success-redirect",
-    "auto_debit_auth_msg": "Authorization amount will be refunded in 5 to 7 working days",
-    "key": "5OEKXZESM",
-    "merchant_logo": "NA",
-    "udf1": "HOD12321424",
-    "udf2": "NA",
-    "udf3": "NA",
-    "udf4": "NA",
-    "udf5": 10.0,
-    "udf6": "NA",
-    "udf7": "NA",
-    "udf8": "",
-    "udf9": "",
-    "udf10": ""
+    "status": true,
+    "msg": [
+        {
+            "txnid": "ThGo15gIzRGalueYwuygx5u6VbYoCY2R",
+            "firstname": "vereesh",
+            "email": "hmvereesh@gmail.com",
+            "phone": "9880418761",
+            "key": "5OEKXZESM",
+            "mode": "NA",
+            "unmappedstatus": "NA",
+            "cardCategory": "NA",
+            "addedon": "2024-09-13 12:36:41",
+            "payment_source": "Easebuzz",
+            "PG_TYPE": "NA",
+            "bank_ref_num": "NA",
+            "bankcode": "NA",
+            "error": "NA",
+            "error_Message": "NA",
+            "name_on_card": "NA",
+            "upi_va": "NA",
+            "cardnum": "NA",
+            "issuing_bank": "NA",
+            "easepayid": "S240913073U90R",
+            "amount": "1.0",
+            "net_amount_debit": "1.0",
+            "cash_back_percentage": "50.0",
+            "deduction_percentage": "0",
+            "merchant_logo": "NA",
+            "surl": "https://localhost:8081/autopay/api/status/v1/success-redirect",
+            "furl": "https://localhost:8081/autopay/api/status/v1/failure-redirect",
+            "productinfo": "saswatloan",
+            "udf10": "",
+            "udf9": "",
+            "udf8": "",
+            "udf7": "NA",
+            "udf6": "NA",
+            "udf5": "1.0",
+            "udf4": "NA",
+            "udf3": "NA",
+            "udf2": "NA",
+            "udf1": "HOD12321424",
+            "card_type": "NA",
+            "hash": "ce05298d137bd9af902738e2760d6bf3e211fcd439af7a412456feefe6346b3a25221ac395f0b36dad46397ddf417506552f2dd4a2c2c5b08e43e1b172048131",
+            "status": "preinitiated",
+            "bank_name": "NA",
+            "auth_code": "",
+            "auth_ref_num": "NA"
+        }
+    ]
 }
 #========================
 
@@ -112,9 +111,12 @@ ResponseBody :
 
 RequestBody:
 
-amount:1.0
-customer_authentication_id:cfGVQzsT9WMkYEMCEt2fVZsJJx0j02Us
-auto_debit_access_key:2a84b3d7-c789-402a-af0a-87e3e99de282
+{
+  "amount": 8,
+  "customer_authentication_id": "3NOubi1Utu7qbMh5dzPvk9nnOt5k1Jep",
+  "auto_debit_access_key": "60aec47d-24b6-470d-9793-a6819901bf1e"
+}
+
 
 
 ResponseBody :

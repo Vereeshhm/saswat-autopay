@@ -37,17 +37,19 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.saswat.autopay.Utils.PropertiesConfig;
 import com.saswat.autopay.dto.CancelMandateDto;
 import com.saswat.autopay.dto.DebitAutopayRequestDto;
+import com.saswat.autopay.dto.TransactionStatusDto;
 import com.saswat.autopay.model.AutopayApiLog;
 import com.saswat.autopay.model.Cancelmandatedetails;
 import com.saswat.autopay.model.Debitrequestdetails;
 import com.saswat.autopay.model.InitiateAutopayRequestDto;
+import com.saswat.autopay.model.TransactionEntity;
 import com.saswat.autopay.repository.AutopayApilogrepository;
 import com.saswat.autopay.repository.CancelMandatedetailsrepository;
 import com.saswat.autopay.repository.DebitRequestRepository;
 import com.saswat.autopay.repository.InitiateAutopayRepository;
+import com.saswat.autopay.repository.TransactionEntityRepository;
 import com.saswat.autopay.repository.TransactionRepository;
 import com.saswat.autopay.service.EasebuzzAutopayRegisterService;
-
 
 import net.minidev.json.JSONObject;
 
@@ -70,6 +72,9 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 	TransactionRepository transactionRepository;
 	@Autowired
 	CancelMandatedetailsrepository cancelMandatedetailsrepository;
+
+	@Autowired
+	TransactionEntityRepository transactionEntityRepository;
 
 	@Autowired
 	RestTemplate restTemplate;
@@ -99,11 +104,11 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 	}
 
 	@Override
-	public ResponseEntity<String> registerAutopay(com.saswat.autopay.dto.RegisterAutopayRequestDto registerAutopayRequestDto)
-			throws Exception {
-		
-		InitiateAutopayRequestDto initiateAutopayRequestDto=new InitiateAutopayRequestDto();
-		
+	public ResponseEntity<String> registerAutopay(
+			com.saswat.autopay.dto.RegisterAutopayRequestDto registerAutopayRequestDto) throws Exception {
+
+		InitiateAutopayRequestDto initiateAutopayRequestDto = new InitiateAutopayRequestDto();
+
 		initiateAutopayRequestDto.setAmount(registerAutopayRequestDto.getAmount());
 		initiateAutopayRequestDto.setProductinfo(registerAutopayRequestDto.getProductinfo());
 		initiateAutopayRequestDto.setFirstname(registerAutopayRequestDto.getFirstname());
@@ -118,9 +123,7 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 		initiateAutopayRequestDto.setCountry(registerAutopayRequestDto.getCountry());
 		initiateAutopayRequestDto.setZipcode(registerAutopayRequestDto.getZipcode());
 		initiateAutopayRequestDto.setFinal_collection_date(registerAutopayRequestDto.getFinal_collection_date());
-		initiateAutopayRequestDto.setShow_payment_mode("UPI");
-		
-		
+		initiateAutopayRequestDto.setShow_payment_mode("");
 
 		String UrlString = config.getInitiatelinkurl();
 		String txnid = generateUniqueTransactionId();
@@ -281,6 +284,17 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 					responseObject.put("finalCollectionDate", initiateAutopayRequestDto.getFinal_collection_date());
 					responseObject.put("maxAmount", initiateAutopayRequestDto.getMaxAmount());
 					responseObject.put("access_key", accessKey);
+
+					TransactionEntity transaction = new TransactionEntity();
+					transaction.setEmail(initiateAutopayRequestDto.getEmail());
+					transaction.setFirstname(initiateAutopayRequestDto.getFirstname());
+
+					transaction.setHash(hash);
+					transaction.setPhone(initiateAutopayRequestDto.getPhone());
+					transaction.setTxnid(txnid);
+
+					transaction.setTxnCreatedAt(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
+					transactionEntityRepository.save(transaction);
 
 					logger.info("Response Body " + responseObject);
 					logApi(UrlString, urlParameters, responseObject.toString(), HttpStatus.OK, "Success", "Initiate");
@@ -672,7 +686,6 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 				cancelMandateDetails.setAuto_debit_access_key(autoDebitAccessKey);
 				cancelMandateDetails.setCustomer_authentication_id(customerAuthId);
 
-				
 				logger.info("Setting auto_debit_access_key: {}", autoDebitAccessKey);
 				logger.info("Setting customer_authentication_id: {}", customerAuthId);
 
@@ -705,6 +718,155 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 			if (connection != null) {
 				connection.disconnect();
 			}
+		}
+
+	}
+
+	@Override
+	public ResponseEntity<String> getTransactionstatus(TransactionStatusDto statusrequest) throws Exception {
+
+		String txnid = statusrequest.getTxnid();
+
+		String UrlString = config.getTransactionUrl();
+		String hashString = config.getKey() + "|" + txnid + "|" + config.getSalt();
+
+		logger.info("Generated txnid " + txnid);
+		String hash = generateHash(hashString);
+
+		logger.info("Generated hash for Transaction status " + hash);
+		statusrequest.setHash(hash);
+		statusrequest.setTxnid(statusrequest.getTxnid());
+		statusrequest.setKey(config.getKey());
+
+		String urlParameters = "txnid=" + txnid + "&key=" + config.getKey() + "&hash=" + hash;
+
+		String responseBody = null;
+		String errorResponse = null;
+
+		HttpURLConnection connection = null;
+
+		try {
+			URL url = new URL(UrlString);
+			connection = (HttpURLConnection) url.openConnection();
+			connection.setRequestMethod("POST");
+			connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+			connection.setDoOutput(true);
+
+			logger.info("Request Url: " + UrlString);
+			logger.info("Request Body: " + urlParameters);
+
+			try (DataOutputStream wr = new DataOutputStream(connection.getOutputStream())) {
+				wr.writeBytes(urlParameters);
+				wr.flush();
+			}
+
+			int responseCode = connection.getResponseCode();
+			logger.info("Response Code: " + responseCode);
+
+			StringBuilder response = new StringBuilder();
+			if (responseCode == HttpURLConnection.HTTP_OK) {
+				try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+					String inputLine;
+					while ((inputLine = in.readLine()) != null) {
+						response.append(inputLine);
+					}
+				}
+				responseBody = response.toString();
+				logger.info("Response Body: " + responseBody);
+
+				ObjectMapper mapper = new ObjectMapper();
+				JsonNode jsonResponse = mapper.readTree(responseBody);
+
+				// Check if the response contains the "status" field and it's true
+				boolean status = jsonResponse.get("status").asBoolean();
+				if (status) {
+					JsonNode msgNode = jsonResponse.get("msg").get(0);
+
+					String transactionId = msgNode.has("txnid") ? msgNode.get("txnid").asText() : null;
+					String firstname = msgNode.has("firstname") ? msgNode.get("firstname").asText() : null;
+					String email = msgNode.has("email") ? msgNode.get("email").asText() : null;
+					String phone = msgNode.has("phone") ? msgNode.get("phone").asText() : null;
+
+					String easepayid = msgNode.has("easepayid") ? msgNode.get("easepayid").asText() : null;
+					String amount = msgNode.has("amount") ? msgNode.get("amount").asText() : null;
+					String productinfo = msgNode.has("productinfo") ? msgNode.get("productinfo").asText() : null;
+					String hashValue = msgNode.has("hash") ? msgNode.get("hash").asText() : null;
+					String paymentSource = msgNode.has("payment_source") ? msgNode.get("payment_source").asText()
+							: null;
+					String surl = msgNode.has("surl") ? msgNode.get("surl").asText() : null;
+					String furl = msgNode.has("furl") ? msgNode.get("furl").asText() : null;
+					String statusMessage = msgNode.has("status") ? msgNode.get("status").asText() : null;
+					String customerauthenticationid = msgNode.has("customer_authentication_id")
+							? msgNode.get("customer_authentication_id").asText()
+							: null;
+					String autodebitaccesskey = msgNode.has("auto_debit_access_key")
+							? msgNode.get("auto_debit_access_key").asText()
+							: "NA";
+					String authorization_status = msgNode.has("authorization_status")
+							? msgNode.get("authorization_status").asText()
+							: "NA";
+					String addedon = msgNode.has("addedon") ? msgNode.get("addedon").asText() : null;
+
+					// Create a new Transactions entity and populate it
+					TransactionEntity transaction = new TransactionEntity();
+					transaction.setTxnid(transactionId);
+					transaction.setFirstname(firstname);
+					transaction.setEmail(email);
+					transaction.setPhone(phone);
+					transaction.setEasepayid(easepayid);
+					transaction.setAmount(Double.parseDouble(amount));
+					transaction.setProductInfo(productinfo);
+					transaction.setHash(hashValue);
+					transaction.setPaymentSource(paymentSource);
+					transaction.setSuccessUrl(surl);
+					transaction.setFailureUrl(furl);
+					transaction.setStatus(statusMessage);
+					transaction.setCustomer_authentication_id(customerauthenticationid);
+					transaction.setAuto_debit_access_key(autodebitaccesskey);
+					transaction.setAuthorization_status(authorization_status);
+
+					transaction.setAddedon(addedon);
+					// Save the transaction to the database
+					transactionEntityRepository.save(transaction);
+
+					logApi(UrlString, urlParameters, responseBody, HttpStatus.OK, "Success", "Transaction success");
+					return ResponseEntity.ok(responseBody);
+
+				} else {
+					// Handle error response
+					String errorDesc = jsonResponse.get("msg").get(0).get("error_Message").asText();
+					logger.error("Error: " + errorDesc);
+					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + errorDesc);
+				}
+
+			} else {
+				try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getErrorStream()))) {
+					String inputLine;
+					while ((inputLine = in.readLine()) != null) {
+						response.append(inputLine);
+					}
+				}
+				errorResponse = response.toString();
+				logger.error("Error Response Body: " + errorResponse);
+
+				logApi(UrlString, urlParameters, responseBody, HttpStatus.OK, "Failure", "Transaction failure");
+				return ResponseEntity.status(responseCode).body(errorResponse);
+
+			}
+
+		} catch (IOException e) {
+
+			errorResponse = e.getMessage();
+			logger.error("Exception occurred: " + e.getMessage(), e);
+
+			logApi(UrlString, urlParameters, responseBody, HttpStatus.INTERNAL_SERVER_ERROR, "Failure",
+					"Transaction failure");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+		} finally {
+			if (connection != null) {
+				connection.disconnect();
+			}
+
 		}
 
 	}

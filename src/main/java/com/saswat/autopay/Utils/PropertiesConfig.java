@@ -31,6 +31,17 @@ public class PropertiesConfig {
 
 	@Value("${CancelMandate.url}")
 	private String CancelMandateurl;
+	
+	@Value("${Transaction.Url}")
+	private String TransactionUrl;
+
+	public String getTransactionUrl() {
+		return TransactionUrl;
+	}
+
+	public void setTransactionUrl(String transactionUrl) {
+		TransactionUrl = transactionUrl;
+	}
 
 	public String getCancelMandateurl() {
 		return CancelMandateurl;
