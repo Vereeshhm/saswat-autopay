@@ -2,18 +2,11 @@ package com.saswat.autopay.dto;
 
 public class CancelMandateDto {
 
-	
-	
 	private String key;
-	
-	
 	private String easebuzz_id;
-	
-	
 	private String customer_authentication_id;
-	
 	private String auto_debit_access_key;
-	
+
 	private String hash;
 
 	public String getKey() {
@@ -55,6 +48,13 @@ public class CancelMandateDto {
 	public void setHash(String hash) {
 		this.hash = hash;
 	}
+
+	@Override
+	public String toString() {
+		return "CancelMandateDto [key=" + key + ", easebuzz_id=" + easebuzz_id + ", customer_authentication_id="
+				+ customer_authentication_id + ", auto_debit_access_key=" + auto_debit_access_key + ", hash=" + hash
+				+ "]";
+	}
 	
-	
+
 }

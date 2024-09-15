@@ -43,7 +43,7 @@ ResponseBody :
 
 
 
-2.Transaction status api: https://98.70.77.51:8083/autopay/api/saswat/v1/payment/transaction/retrieve
+2.Transaction status api: https://98.70.77.51:8083/autopay/api/saswat/v1/transaction
 
 RequestBody:
 

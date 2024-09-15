@@ -8,12 +8,10 @@ public class RegisterAutopayRequestDto {
 
 	private Float amount;
 	private String productinfo;
-	private String firstname;
-	
+	private String firstname;	
 	@Size(min = 10, max = 10, message = "Phone number must be exactly 10 digits")
 	@Pattern(regexp = "\\d{10}", message = "Phone number must contain only digits")
 	private String phone;
-	
 	private String email;
 	private String udf1;
 	private Float maxAmount;

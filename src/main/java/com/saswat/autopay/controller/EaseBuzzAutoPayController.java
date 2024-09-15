@@ -111,17 +111,18 @@ public class EaseBuzzAutoPayController {
 		return easebuzzautopayservice.cancelMandate(cancelMandateDto);
 	}
 
+	@PostMapping("/v1/transaction")
+	public ResponseEntity<String> getTransactionstatus(@RequestBody TransactionStatusDto statusrequest)
+			throws Exception {
+
+		return easebuzzautopayservice.getTransactionstatus(statusrequest);
+	}
+
 	@PostMapping("/v1/payment/enach/initiate")
 	public ResponseEntity<String> InitiatePay(@ModelAttribute InitiateEnachRequestDto initiateEnachRequestDto)
 			throws Exception {
 
 		return easebuzzEnachRegisterService.registerEnach(initiateEnachRequestDto);
-	}
-
-	@PostMapping("/v1/payment/transaction/retrieve")
-	public ResponseEntity<String> getTransactionstatus(@RequestBody TransactionStatusDto statusrequest) throws Exception {
-
-		return easebuzzautopayservice.getTransactionstatus(statusrequest);
 	}
 
 }

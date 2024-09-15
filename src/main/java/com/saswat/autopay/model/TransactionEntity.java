@@ -16,35 +16,72 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @Table(name = "transactions")
 public class TransactionEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    private String firstname;
-    private String email;
-    private String phone;
-    private String txnid;
-    private String easepayid;
-    private Double amount;
-    private String productInfo;
-    private String hash;
-    private String paymentSource;
-    private String successUrl;
-    private String failureUrl;
-    private String status;
-    @JsonProperty("customer_authentication_id")
-    @Column(name="customer_authentication_id")
-    private String customer_authentication_id;
-    @Column(name="auto_debit_access_key")
-    private String auto_debit_access_key;
-    
-    @Column(name="authorization_status")
-    private String authorization_status;
-    
-    private String addedon;
-    
+	private String firstname;
+	private String email;
+	private String phone;
+	private String txnid;
+	private String easepayid;
+	private Double amount;
+	private String udf5;
+	private String productInfo;
+	private String hash;
+	private String paymentSource;
+	private String successUrl;
+	private String failureUrl;
+	private String status;
+	@Column(name = "card_type")
+	private String card_type;
+	@JsonProperty("customer_authentication_id")
+	@Column(name = "customer_authentication_id")
+	private String customer_authentication_id;
+	@Column(name = "auto_debit_access_key")
+	private String auto_debit_access_key;
+	@Column(name = "authorization_status")
+	private String authorization_status;
 
-    public String getAddedon() {
+	private String addedon;
+
+	private String error;
+
+	private String error_Message;
+
+	public String getUdf5() {
+		return udf5;
+	}
+
+	public void setUdf5(String udf5) {
+		this.udf5 = udf5;
+	}
+
+	public String getError() {
+		return error;
+	}
+
+	public void setError(String error) {
+		this.error = error;
+	}
+
+	public String getError_Message() {
+		return error_Message;
+	}
+
+	public void setError_Message(String error_Message) {
+		this.error_Message = error_Message;
+	}
+
+	public String getCard_type() {
+		return card_type;
+	}
+
+	public void setCard_type(String card_type) {
+		this.card_type = card_type;
+	}
+
+	public String getAddedon() {
 		return addedon;
 	}
 
@@ -54,9 +91,9 @@ public class TransactionEntity {
 
 	private LocalDateTime txnCreatedAt = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
 
-    // Getters and setters
+	// Getters and setters
 
-    public String getCustomer_authentication_id() {
+	public String getCustomer_authentication_id() {
 		return customer_authentication_id;
 	}
 
@@ -81,114 +118,114 @@ public class TransactionEntity {
 	}
 
 	public Long getId() {
-        return id;
-    }
+		return id;
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public String getFirstname() {
-        return firstname;
-    }
+	public String getFirstname() {
+		return firstname;
+	}
 
-    public void setFirstname(String firstname) {
-        this.firstname = firstname;
-    }
+	public void setFirstname(String firstname) {
+		this.firstname = firstname;
+	}
 
-    public String getEmail() {
-        return email;
-    }
+	public String getEmail() {
+		return email;
+	}
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
-    public String getPhone() {
-        return phone;
-    }
+	public String getPhone() {
+		return phone;
+	}
 
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
 
-    public String getTxnid() {
-        return txnid;
-    }
+	public String getTxnid() {
+		return txnid;
+	}
 
-    public void setTxnid(String txnid) {
-        this.txnid = txnid;
-    }
+	public void setTxnid(String txnid) {
+		this.txnid = txnid;
+	}
 
-    public String getEasepayid() {
-        return easepayid;
-    }
+	public String getEasepayid() {
+		return easepayid;
+	}
 
-    public void setEasepayid(String easepayid) {
-        this.easepayid = easepayid;
-    }
+	public void setEasepayid(String easepayid) {
+		this.easepayid = easepayid;
+	}
 
-    public Double getAmount() {
-        return amount;
-    }
+	public Double getAmount() {
+		return amount;
+	}
 
-    public void setAmount(Double amount) {
-        this.amount = amount;
-    }
+	public void setAmount(Double amount) {
+		this.amount = amount;
+	}
 
-    public String getProductInfo() {
-        return productInfo;
-    }
+	public String getProductInfo() {
+		return productInfo;
+	}
 
-    public void setProductInfo(String productInfo) {
-        this.productInfo = productInfo;
-    }
+	public void setProductInfo(String productInfo) {
+		this.productInfo = productInfo;
+	}
 
-    public String getHash() {
-        return hash;
-    }
+	public String getHash() {
+		return hash;
+	}
 
-    public void setHash(String hash) {
-        this.hash = hash;
-    }
+	public void setHash(String hash) {
+		this.hash = hash;
+	}
 
-    public String getPaymentSource() {
-        return paymentSource;
-    }
+	public String getPaymentSource() {
+		return paymentSource;
+	}
 
-    public void setPaymentSource(String paymentSource) {
-        this.paymentSource = paymentSource;
-    }
+	public void setPaymentSource(String paymentSource) {
+		this.paymentSource = paymentSource;
+	}
 
-    public String getSuccessUrl() {
-        return successUrl;
-    }
+	public String getSuccessUrl() {
+		return successUrl;
+	}
 
-    public void setSuccessUrl(String successUrl) {
-        this.successUrl = successUrl;
-    }
+	public void setSuccessUrl(String successUrl) {
+		this.successUrl = successUrl;
+	}
 
-    public String getFailureUrl() {
-        return failureUrl;
-    }
+	public String getFailureUrl() {
+		return failureUrl;
+	}
 
-    public void setFailureUrl(String failureUrl) {
-        this.failureUrl = failureUrl;
-    }
+	public void setFailureUrl(String failureUrl) {
+		this.failureUrl = failureUrl;
+	}
 
-    public String getStatus() {
-        return status;
-    }
+	public String getStatus() {
+		return status;
+	}
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
+	public void setStatus(String status) {
+		this.status = status;
+	}
 
-    public LocalDateTime getTxnCreatedAt() {
-        return txnCreatedAt;
-    }
+	public LocalDateTime getTxnCreatedAt() {
+		return txnCreatedAt;
+	}
 
-    public void setTxnCreatedAt(LocalDateTime txnCreatedAt) {
-        this.txnCreatedAt = txnCreatedAt;
-    }
+	public void setTxnCreatedAt(LocalDateTime txnCreatedAt) {
+		this.txnCreatedAt = txnCreatedAt;
+	}
 }
