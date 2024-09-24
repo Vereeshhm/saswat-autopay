@@ -6,18 +6,19 @@ RequestBody :
 {
     "amount": "1.0",
     "productinfo": "saswatloan",
-    "firstname": "anuj",
-    "phone": "8792140219",
+    "firstname": "vereesh",
+    "phone": "9880418761",
     "email": "hmvereesh@gmail.com",
     "udf1": "HOD12321424",
-    "maxAmount": "10.0",
+    "maxAmount": "10.0", 
     "address1": "jp nagar",
     "address2": "bangalore",
     "city": "bangalore",
     "state": "karnataka",
-    "country": "India",
-    "zipcode": "584001",
-    "final_collection_date": "31/12/2024"
+    "country": "India", 
+    "zipcode": "584140",
+    "final_collection_date": "31/12/2024",
+    "lenderName":"WESTERN CAPITAL ADVISORS PVT LTD" 
 }
 
 
@@ -146,3 +147,19 @@ ResponseBody:
  status:true
  data:Auto debit authorization canceled successfully
  }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ #lendersubmerchant sql queries 
+ 
+ #example
+insert into lendersubmerchant values(1,'WESTERN CAPITAL ADVISORS PVT LTD','S142891Q8IF','preproduction');
+insert into lendersubmerchant values(2,'WESTERN CAPITAL ADVISORS PVT LTD','S1428914X1H','production');
+insert into lendersubmerchant values(3,'AMBIT FINVEST PRIVATE LIMITED','S142891FSWR','production');
+insert into lendersubmerchant values(4,'AMBIT FINVEST PRIVATE LIMITED','S1428914FNG','preproduction');
+
+ 

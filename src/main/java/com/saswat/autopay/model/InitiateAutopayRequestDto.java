@@ -35,7 +35,7 @@ public class InitiateAutopayRequestDto {
 
 	@Column(name = "firstname")
 	private String firstname;
-	
+
 	@Size(min = 10, max = 10, message = "Phone number must be exactly 10 digits")
 	@Pattern(regexp = "\\d{10}", message = "Phone number must contain only digits")
 	@Column(name = "phone")
@@ -120,11 +120,22 @@ public class InitiateAutopayRequestDto {
 
 	@Column(name = "status_mesg")
 	private String statusMesg;
-	
-	@Column(name="errorDesc")
+
+	@Column(name = "errorDesc")
 	private String errorDesc;
-	
+
 	private String show_payment_mode;
+
+	@Column(name = "lender_name") // Add this line for lenderName
+	private String lenderName;
+
+	public String getLenderName() {
+		return lenderName;
+	}
+
+	public void setLenderName(String lenderName) {
+		this.lenderName = lenderName;
+	}
 
 	public String getErrorDesc() {
 		return errorDesc;
@@ -397,8 +408,6 @@ public class InitiateAutopayRequestDto {
 	public void setMaxAmount(Float maxAmount) {
 		this.maxAmount = maxAmount;
 	}
-	
-	
 
 	public String getShow_payment_mode() {
 		return show_payment_mode;

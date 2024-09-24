@@ -25,6 +25,7 @@ import javax.crypto.spec.IvParameterSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -42,13 +43,14 @@ import com.saswat.autopay.model.AutopayApiLog;
 import com.saswat.autopay.model.Cancelmandatedetails;
 import com.saswat.autopay.model.Debitrequestdetails;
 import com.saswat.autopay.model.InitiateAutopayRequestDto;
+import com.saswat.autopay.model.LenderSubmerchant;
 import com.saswat.autopay.model.TransactionEntity;
 import com.saswat.autopay.repository.AutopayApilogrepository;
 import com.saswat.autopay.repository.CancelMandatedetailsrepository;
 import com.saswat.autopay.repository.DebitRequestRepository;
 import com.saswat.autopay.repository.InitiateAutopayRepository;
+import com.saswat.autopay.repository.LenderSubmerchantRepository;
 import com.saswat.autopay.repository.TransactionEntityRepository;
-
 import com.saswat.autopay.service.EasebuzzAutopayRegisterService;
 
 import net.minidev.json.JSONObject;
@@ -78,10 +80,28 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 	RestTemplate restTemplate;
 	private Key secretKey;
 
+	@Autowired
+	Environment environment; // Inject Environment
+
+	@Autowired
+	LenderSubmerchantRepository lenderSubmerchantRepository;
+
 	private static final Logger logger = LoggerFactory.getLogger(EasebuzzAutopayRegisterServiceImpl.class);
 
 	public EasebuzzAutopayRegisterServiceImpl() {
 		this.secretKey = generateSecretKey();
+	}
+
+	private String getSubMerchantId(String lenderName) {
+		String currentProfile = environment.getActiveProfiles()[0]; // Get active profile
+
+		logger.info("current environment running:{} ", currentProfile);
+		Optional<LenderSubmerchant> lenderSubmerchantOpt = lenderSubmerchantRepository
+				.findByLenderNameAndEnvironment(lenderName.toLowerCase(), currentProfile);
+
+		return lenderSubmerchantOpt.map(LenderSubmerchant::getSubMerchantId)
+				.orElseThrow(() -> new IllegalArgumentException(
+						"No submerchant ID found for lender: " + lenderName + " in environment: " + currentProfile));
 	}
 
 	public void logApi(String url, String requestBody, String responseBody, HttpStatus status, String statusmsg,
@@ -91,7 +111,7 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 		apiLog.setUrl(url);
 		apiLog.setRequestBody(requestBody);
 		apiLog.setResponseBody(responseBody);
-		apiLog.setStatusCode(status.value()); // Status will now be correctly set
+		apiLog.setStatusCode(status.value());
 		apiLog.setCreated_date(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
 		apiLog.setApiType(apiType);
 		apiLog.setStatus(statusmsg);
@@ -127,6 +147,19 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 		String txnid = generateUniqueTransactionId();
 		String customerAuthenticationId = generateUniqueCustomerAuthenticationId();
 
+		String lenderName = registerAutopayRequestDto.getLenderName();
+		if (lenderName == null || lenderName.isEmpty()) {
+			throw new IllegalArgumentException("Lender name cannot be null or empty.");
+		}
+
+		// Get Sub-Merchant ID based on the lender name and active profile
+		String subMerchantId = getSubMerchantId(lenderName);
+		initiateAutopayRequestDto.setSub_merchant_id(subMerchantId);
+
+		// Log lender information
+		logger.info("Received lenderName: {}, Sub-Merchant ID: {}", lenderName, subMerchantId);
+
+		initiateAutopayRequestDto.setSub_merchant_id(subMerchantId);
 		initiateAutopayRequestDto.setUdf2("NA");
 		initiateAutopayRequestDto.setUdf3("NA");
 		initiateAutopayRequestDto.setUdf4("NA");
@@ -170,7 +203,7 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 				+ initiateAutopayRequestDto.getAddress2() + "&city=" + initiateAutopayRequestDto.getCity() + "&state="
 				+ initiateAutopayRequestDto.getState() + "&country=" + initiateAutopayRequestDto.getCountry()
 				+ "&zipcode=" + initiateAutopayRequestDto.getZipcode() + "&customer_authentication_id="
-				+ customerAuthenticationId + "&sub_merchant_id=" + config.getSubmerchantid()
+				+ customerAuthenticationId + "&sub_merchant_id=" + subMerchantId + "&lenderName=" + lenderName
 
 				+ "&final_collection_date=" + initiateAutopayRequestDto.getFinal_collection_date();
 
@@ -180,9 +213,10 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 		initiateAutopayRequestDto.setTxnid(txnid);
 		initiateAutopayRequestDto.setHash(hash);
 		initiateAutopayRequestDto.setKey(config.getKey());
-		initiateAutopayRequestDto.setSub_merchant_id(config.getSubmerchantid());
+		initiateAutopayRequestDto.setSub_merchant_id(subMerchantId);
 		initiateAutopayRequestDto.setCreated_by("Admin");
 		initiateAutopayRequestDto.setCreated_date(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
+		initiateAutopayRequestDto.setLenderName(lenderName);
 
 		String phone = initiateAutopayRequestDto.getPhone();
 		if (phone == null || !phone.matches("\\d{10}")) {
@@ -380,10 +414,8 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 
 		}
 
-		// Extract the entity from Optional
 		InitiateAutopayRequestDto autopayEntity = autopayEntityOpt.get();
 
-		// Set fields from the entity
 		debitAutopayRequestDto.setProductinfo(autopayEntity.getProductinfo());
 		debitAutopayRequestDto.setFirstname(autopayEntity.getFirstname());
 		debitAutopayRequestDto.setPhone(autopayEntity.getPhone());
@@ -395,6 +427,7 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 		debitAutopayRequestDto.setState(autopayEntity.getState());
 		debitAutopayRequestDto.setCountry(autopayEntity.getCountry());
 		debitAutopayRequestDto.setZipcode(autopayEntity.getZipcode());
+		debitAutopayRequestDto.setSub_merchant_id(autopayEntity.getSub_merchant_id());
 
 		String UrlString = config.getDebitRequesturl();
 		String txnid = generateUniqueTransactionId();
@@ -442,7 +475,8 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 				+ "&customer_authentication_id=" + debitAutopayRequestDto.getCustomer_authentication_id()
 
 				+ "&merchant_debit_id=" + merchant_debit_id + "&auto_debit_access_key="
-				+ debitAutopayRequestDto.getAuto_debit_access_key() + "&sub_merchant_id=" + config.getSubmerchantid();
+				+ debitAutopayRequestDto.getAuto_debit_access_key() + "&sub_merchant_id="
+				+ debitAutopayRequestDto.getSub_merchant_id();
 
 		Debitrequestdetails debitrequestdetails = new Debitrequestdetails();
 
@@ -648,6 +682,7 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 					if (jsonResponse.has("message")) {
 						String message = jsonResponse.get("message").asText();
 						cancelMandateDetails.setMessage(message);
+
 						logger.info("Success response message: {}", message);
 					}
 
@@ -658,6 +693,7 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 					if (jsonResponse.has("message")) {
 						String message = jsonResponse.get("message").asText();
 						cancelMandateDetails.setMessage(message);
+
 						logger.info("Error response message: {}", message);
 					}
 				}
@@ -875,7 +911,7 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 				}
 
 			} else {
-				
+
 				try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getErrorStream()))) {
 					String inputLine;
 					while ((inputLine = in.readLine()) != null) {
@@ -976,7 +1012,7 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 
 	private String generateHash(String input) throws NoSuchAlgorithmException {
 		MessageDigest md = MessageDigest.getInstance("sha512");
-		md.update(input.getBytes(StandardCharsets.UTF_8)); // Ensure UTF-8 encoding
+		md.update(input.getBytes(StandardCharsets.UTF_8));
 		byte[] hashBytes = md.digest();
 		StringBuilder sb = new StringBuilder();
 		for (byte b : hashBytes) {

@@ -23,17 +23,9 @@ public class Cancelmandatedetails {
 
 	@Column(name = "auto_debit_access_key")
 	private String auto_debit_access_key;
-	
-	@Column(name="customer_authentication_id")
+
+	@Column(name = "customer_authentication_id")
 	private String customer_authentication_id;
-
-	public String getCustomer_authentication_id() {
-		return customer_authentication_id;
-	}
-
-	public void setCustomer_authentication_id(String customer_authentication_id) {
-		this.customer_authentication_id = customer_authentication_id;
-	}
 
 	@Column(name = "hash")
 	private String hash;
@@ -46,14 +38,12 @@ public class Cancelmandatedetails {
 
 	@Column(name = "easebuzz_id")
 	private String easebuzz_id;
-	
-	@Column(name="message")
+
+	@Column(name = "message")
 	private String message;
-	
-	@Column(name="data")
+
+	@Column(name = "data")
 	private String data;
-	
-	
 
 	public String getData() {
 		return data;
@@ -73,8 +63,6 @@ public class Cancelmandatedetails {
 	public void setEasebuzz_id(String easebuzz_id) {
 		this.easebuzz_id = easebuzz_id;
 	}
-
-	
 
 	public String getMessage() {
 		return message;
@@ -140,6 +128,11 @@ public class Cancelmandatedetails {
 		this.error_desc = error_desc;
 	}
 
-	
+	public String getCustomer_authentication_id() {
+		return customer_authentication_id;
+	}
 
+	public void setCustomer_authentication_id(String customer_authentication_id) {
+		this.customer_authentication_id = customer_authentication_id;
+	}
 }

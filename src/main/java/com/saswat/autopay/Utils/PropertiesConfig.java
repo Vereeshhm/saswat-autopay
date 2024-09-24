@@ -31,9 +31,26 @@ public class PropertiesConfig {
 
 	@Value("${CancelMandate.url}")
 	private String CancelMandateurl;
-	
+
 	@Value("${Transaction.Url}")
 	private String TransactionUrl;
+
+
+//	@Value("${sub_merchant_id.wcap}")
+//	private String sub_merchant_idwcap;
+//
+//	@Value("${sub_merchant_id.ambit}")
+//	private String sub_merchant_idambit;
+//	
+//	
+//
+//	public String getSub_merchant_idambit() {
+//		return sub_merchant_idambit;
+//	}
+//
+//	public void setSub_merchant_idambit(String sub_merchant_idambit) {
+//		this.sub_merchant_idambit = sub_merchant_idambit;
+//	}
 
 	public String getTransactionUrl() {
 		return TransactionUrl;
@@ -51,27 +68,15 @@ public class PropertiesConfig {
 		CancelMandateurl = cancelMandateurl;
 	}
 
-	@Value("${InitiateEnachpay.Url}")
-	private String InitiateEnachpayUrl;
+//	public String getSub_merchant_idwcap() {
+//		return sub_merchant_idwcap;
+//	}
+//
+//	public void setSub_merchant_idwcap(String sub_merchant_idwcap) {
+//		this.sub_merchant_idwcap = sub_merchant_idwcap;
+//	}
 
-	@Value("${sub_merchant_id}")
-	private String submerchantid;
 
-	public String getSubmerchantid() {
-		return submerchantid;
-	}
-
-	public void setSubmerchantid(String submerchantid) {
-		this.submerchantid = submerchantid;
-	}
-
-	public String getInitiateEnachpayUrl() {
-		return InitiateEnachpayUrl;
-	}
-
-	public void setInitiateEnachpayUrl(String initiateEnachpayUrl) {
-		InitiateEnachpayUrl = initiateEnachpayUrl;
-	}
 
 	public String getPaymentUrl() {
 		return PaymentUrl;
