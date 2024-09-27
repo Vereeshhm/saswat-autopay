@@ -35,23 +35,6 @@ public class PropertiesConfig {
 	@Value("${Transaction.Url}")
 	private String TransactionUrl;
 
-
-//	@Value("${sub_merchant_id.wcap}")
-//	private String sub_merchant_idwcap;
-//
-//	@Value("${sub_merchant_id.ambit}")
-//	private String sub_merchant_idambit;
-//	
-//	
-//
-//	public String getSub_merchant_idambit() {
-//		return sub_merchant_idambit;
-//	}
-//
-//	public void setSub_merchant_idambit(String sub_merchant_idambit) {
-//		this.sub_merchant_idambit = sub_merchant_idambit;
-//	}
-
 	public String getTransactionUrl() {
 		return TransactionUrl;
 	}
@@ -67,16 +50,6 @@ public class PropertiesConfig {
 	public void setCancelMandateurl(String cancelMandateurl) {
 		CancelMandateurl = cancelMandateurl;
 	}
-
-//	public String getSub_merchant_idwcap() {
-//		return sub_merchant_idwcap;
-//	}
-//
-//	public void setSub_merchant_idwcap(String sub_merchant_idwcap) {
-//		this.sub_merchant_idwcap = sub_merchant_idwcap;
-//	}
-
-
 
 	public String getPaymentUrl() {
 		return PaymentUrl;

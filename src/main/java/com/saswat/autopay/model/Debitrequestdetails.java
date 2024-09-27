@@ -19,7 +19,7 @@ public class Debitrequestdetails {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "debit_response_details_seq")
-    @SequenceGenerator(name = "debit_response_details_seq", sequenceName = "debit_response_details_seq", allocationSize = 1)
+	@SequenceGenerator(name = "debit_response_details_seq", sequenceName = "debit_response_details_seq", allocationSize = 1)
 	@Column(name = "id")
 	private Long id;
 
@@ -31,47 +31,70 @@ public class Debitrequestdetails {
 
 	@Column(name = "txnid")
 	private String txnid;
-	
-	@Column(name="firstname")
+
+	@Column(name = "firstname")
 	private String firstname;
-	@Column(name="phone")
+	@Column(name = "phone")
 	private String phone;
-	@Column(name="productinfo")
+	@Column(name = "productinfo")
 	private String productinfo;
-	
-	@Column(name="email")
-	private String email; 
-	
+
+	@Column(name = "email")
+	private String email;
+
 	@JsonProperty("customer_authentication_id")
-	@Column(name="customer_authentication_id")
+	@Column(name = "customer_authentication_id")
 	private String customer_authentication_id;
-	
-	@Column(name="auto_debit_access_key")
+
+	@Column(name = "auto_debit_access_key")
 	@JsonProperty("auto_debit_access_key")
 	private String auto_debit_access_key;
 
 	@Column(name = "merchant_debit_id")
 	@JsonProperty("merchant_debit_id")
 	private String merchant_debit_id;
-	
-	@Column(name="created_date")
-	private LocalDateTime created_date=LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
-	
-	@Column(name="debit_status")
+
+	@Column(name = "created_date")
+	private LocalDateTime created_date = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+
+	@Column(name = "debit_status")
 	private String debitStatus;
 
-	@Column(name="created_by")
-	private String created_by="Admin";
+	@Column(name = "created_by")
+	private String created_by = "Admin";
 
-	@Column(name="hash")
+	@Column(name = "hash")
 	private String hash;
-	
+
 	@Column(name = "max_amount")
 	private Float maxAmount;
-	
-	@Column(name="errorDesc")
+
+	@Column(name = "errorDesc")
 	private String errorDesc;
-	
+
+	@Column(name = "lender_name")
+	private String lenderName;
+
+	@JsonProperty("sub_merchant_id")
+	@Column(name = "sub_merchant_id")
+	private String sub_merchant_id;
+
+	public String getLenderName() {
+		return lenderName;
+	}
+
+	public void setLenderName(String lenderName) {
+		this.lenderName = lenderName;
+	}
+
+	public String getSub_merchant_id() {
+		return sub_merchant_id;
+	}
+
+	public void setSub_merchant_id(String sub_merchant_id) {
+		this.sub_merchant_id = sub_merchant_id;
+	}
+
 	public String getErrorDesc() {
 		return errorDesc;
 	}

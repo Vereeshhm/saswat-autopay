@@ -126,7 +126,7 @@ public class InitiateAutopayRequestDto {
 
 	private String show_payment_mode;
 
-	@Column(name = "lender_name") // Add this line for lenderName
+	@Column(name = "lender_name") 
 	private String lenderName;
 
 	public String getLenderName() {

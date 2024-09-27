@@ -167,7 +167,7 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 		initiateAutopayRequestDto.setUdf6("NA");
 		initiateAutopayRequestDto.setUdf7("NA");
 
-		logger.info("Uniquely generated txnid for registerautopay" + txnid);
+		logger.info("Uniquely generated txnid for registerautopay " + txnid);
 		logger.info("Uniquely generated customerAuthenticationId for registerautopay " + customerAuthenticationId);
 
 		// Generate hash string
@@ -220,7 +220,7 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 
 		String phone = initiateAutopayRequestDto.getPhone();
 		if (phone == null || !phone.matches("\\d{10}")) {
-			// Return a custom error response for invalid phone number
+
 			logger.warn("phone number must be exactly 10 digits and contain only digits.");
 			return createErrorResponse("phone number must be exactly 10 digits and contain only digits.",
 					initiateAutopayRequestDto);
@@ -232,7 +232,6 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 			return createErrorResponse("productinfo is a required field.", initiateAutopayRequestDto);
 		}
 
-		// Required field validation
 		if (initiateAutopayRequestDto.getAddress1() == null || initiateAutopayRequestDto.getAddress1().isEmpty()) {
 			logger.warn("address1 is missing.");
 			return createErrorResponse("address1 is a required field.", initiateAutopayRequestDto);
@@ -316,17 +315,6 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 					responseObject.put("finalCollectionDate", initiateAutopayRequestDto.getFinal_collection_date());
 					responseObject.put("maxAmount", initiateAutopayRequestDto.getMaxAmount());
 					responseObject.put("access_key", accessKey);
-
-					TransactionEntity transaction = new TransactionEntity();
-					transaction.setEmail(initiateAutopayRequestDto.getEmail());
-					transaction.setFirstname(initiateAutopayRequestDto.getFirstname());
-
-					transaction.setHash(hash);
-					transaction.setPhone(initiateAutopayRequestDto.getPhone());
-					transaction.setTxnid(txnid);
-
-					transaction.setTxnCreatedAt(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
-					transactionEntityRepository.save(transaction);
 
 					logger.info("Response Body " + responseObject);
 					logApi(UrlString, urlParameters, responseObject.toString(), HttpStatus.OK, "Success", "Initiate");
@@ -490,6 +478,8 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 		debitrequestdetails.setAuto_debit_access_key(debitAutopayRequestDto.getAuto_debit_access_key());
 		debitrequestdetails.setHash(hash);
 		debitrequestdetails.setMaxAmount(autopayEntity.getMaxAmount());
+		debitrequestdetails.setLenderName(autopayEntity.getLenderName());
+		debitrequestdetails.setSub_merchant_id(autopayEntity.getSub_merchant_id());
 
 		String response1;
 		HttpURLConnection connection = null;
