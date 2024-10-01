@@ -16,12 +16,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.Optional;
 import java.util.UUID;
-
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +28,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -52,7 +49,6 @@ import com.saswat.autopay.repository.InitiateAutopayRepository;
 import com.saswat.autopay.repository.LenderSubmerchantRepository;
 import com.saswat.autopay.repository.TransactionEntityRepository;
 import com.saswat.autopay.service.EasebuzzAutopayRegisterService;
-
 import net.minidev.json.JSONObject;
 
 @Service
@@ -78,10 +74,11 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 
 	@Autowired
 	RestTemplate restTemplate;
+
 	private Key secretKey;
 
 	@Autowired
-	Environment environment; // Inject Environment
+	Environment environment;
 
 	@Autowired
 	LenderSubmerchantRepository lenderSubmerchantRepository;
@@ -152,11 +149,9 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 			throw new IllegalArgumentException("Lender name cannot be null or empty.");
 		}
 
-		// Get Sub-Merchant ID based on the lender name and active profile
 		String subMerchantId = getSubMerchantId(lenderName);
 		initiateAutopayRequestDto.setSub_merchant_id(subMerchantId);
 
-		// Log lender information
 		logger.info("Received lenderName: {}, Sub-Merchant ID: {}", lenderName, subMerchantId);
 
 		initiateAutopayRequestDto.setSub_merchant_id(subMerchantId);
@@ -266,6 +261,7 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 			connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("POST");
 			connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+			connection.setRequestProperty("Accept", "application/json");
 			connection.setDoOutput(true);
 
 			logger.info("Request Url " + UrlString);
@@ -490,6 +486,7 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 			connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("POST");
 			connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+			connection.setRequestProperty("Accept", "application/json");
 			connection.setDoOutput(true);
 
 			logger.info("Request Url " + UrlString);
@@ -613,7 +610,7 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 		json.put("auto_debit_access_key", cancelMandateDto.getAuto_debit_access_key());
 		json.put("hash", hash);
 
-		// Convert JSON object to string
+		
 		String jsonRequestBody = json.toString();
 
 		String response1;
@@ -625,6 +622,7 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 			connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("POST");
 			connection.setRequestProperty("Content-Type", "application/json");
+			connection.setRequestProperty("Accept", "application/json");
 			connection.setDoOutput(true);
 
 			logger.info("Request Url " + config.getCancelMandateurl());
@@ -773,6 +771,7 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 			connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("POST");
 			connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+			connection.setRequestProperty("Accept", "application/json");
 			connection.setDoOutput(true);
 
 			logger.info("Request Url: " + UrlString);
@@ -875,7 +874,7 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 						// Save the transaction to the database
 						transactionEntityRepository.save(transaction);
 
-						logApi(UrlString, urlParameters, responseBody, HttpStatus.OK, "Success", "Transaction success");
+						logApi(UrlString, urlParameters, responseBody, HttpStatus.OK, "Success", "Transaction");
 						return ResponseEntity.ok(responseBody);
 
 					} else {
@@ -892,7 +891,7 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 						transaction.setError_Message(errorDesc);
 						transaction.setTxnid(txnid);
 						transactionEntityRepository.save(transaction);
-						logApi(UrlString, urlParameters, errorDesc, HttpStatus.OK, "failure", "Transaction failure");
+						logApi(UrlString, urlParameters, errorDesc, HttpStatus.OK, "failure", "Transaction");
 						return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + errorDesc);
 					} else {
 						logger.error("Unexpected format for 'msg' when status is false");
@@ -929,7 +928,7 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 				}
 
 				logApi(UrlString, urlParameters, errorResponse, HttpStatus.valueOf(responseCode), "Failure",
-						"Transaction failure");
+						"Transaction");
 				return ResponseEntity.status(responseCode).body(errorResponse); // Return the actual error response
 
 			}
@@ -939,7 +938,7 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 			logger.error("Exception occurred: " + e.getMessage(), e);
 
 			logApi(UrlString, urlParameters, errorResponse, HttpStatus.INTERNAL_SERVER_ERROR, "Failure",
-					"Transaction failure");
+					"Transaction");
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse); // Return the exception
 																								// message
 

@@ -9,7 +9,6 @@ import com.saswat.autopay.dto.CancelMandateDto;
 import com.saswat.autopay.dto.DebitAutopayRequestDto;
 import com.saswat.autopay.dto.RegisterAutopayRequestDto;
 import com.saswat.autopay.dto.TransactionStatusDto;
-import com.saswat.autopay.model.InitiateAutopayRequestDto;
 
 public interface EasebuzzAutopayRegisterService {
 

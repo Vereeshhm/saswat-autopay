@@ -11,9 +11,8 @@ import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-
 @Entity
-@Table(name="autopay_api_logs")
+@Table(name = "autopay_api_logs")
 public class AutopayApiLog {
 
 	@Id
@@ -30,68 +29,58 @@ public class AutopayApiLog {
 	private String responseBody;
 
 	private int statusCode;
-	@Column(name="created_date")
-	private LocalDateTime created_date=LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
-	
-	@Column(name="status")
+	@Column(name = "created_date")
+	private LocalDateTime created_date = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+
+	@Column(name = "status")
 	private String status;
 
-	@Column(name="created_by")
-	private String created_by="Admin";
-	
-	@Column(name="api_type")
+	@Column(name = "created_by")
+	private String created_by = "Admin";
+
+	@Column(name = "api_type")
 	private String apiType;
-	
+
 	public String getApiType() {
 		return apiType;
 	}
-
 
 	public void setApiType(String apiType) {
 		this.apiType = apiType;
 	}
 
-
 	public int getStatusCode() {
 		return statusCode;
 	}
-
 
 	public void setStatusCode(int statusCode) {
 		this.statusCode = statusCode;
 	}
 
-
 	public LocalDateTime getCreated_date() {
 		return created_date;
 	}
-
 
 	public void setCreated_date(LocalDateTime created_date) {
 		this.created_date = created_date;
 	}
 
-
 	public String getCreated_by() {
 		return created_by;
 	}
-
 
 	public void setCreated_by(String created_by) {
 		this.created_by = created_by;
 	}
 
-
 	public void setStatus(String status) {
 		this.status = status;
 	}
-
 
 	public AutopayApiLog() {
 		// Constructor logic (if any)
 	}
 
-	
 	public Long getId() {
 		return id;
 	}
@@ -124,11 +113,9 @@ public class AutopayApiLog {
 		this.responseBody = responseBody;
 	}
 
-
 	public String getStatus() {
 		return status;
 	}
-
 
 	@Override
 	public String toString() {
@@ -137,7 +124,4 @@ public class AutopayApiLog {
 				+ ", created_by=" + created_by + ", apiType=" + apiType + "]";
 	}
 
-	
-	
-	
 }
