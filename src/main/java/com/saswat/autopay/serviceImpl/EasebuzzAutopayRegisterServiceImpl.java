@@ -610,7 +610,6 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 		json.put("auto_debit_access_key", cancelMandateDto.getAuto_debit_access_key());
 		json.put("hash", hash);
 
-		
 		String jsonRequestBody = json.toString();
 
 		String response1;
@@ -887,6 +886,17 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 						String errorDesc = msgNode.asText();
 						logger.error("Error: " + errorDesc);
 
+						if (responseBody.contains("Transaction not found")) {
+
+							logger.warn("Transaction not found");
+							TransactionEntity transaction = new TransactionEntity();
+							transaction.setError_Message(responseBody);
+							transaction.setTxnid(txnid);
+							transactionEntityRepository.save(transaction);
+							logApi(UrlString, urlParameters, responseBody, HttpStatus.NOT_FOUND, "failure",
+									"Transaction");
+							return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseBody);
+						}
 						TransactionEntity transaction = new TransactionEntity();
 						transaction.setError_Message(errorDesc);
 						transaction.setTxnid(txnid);
@@ -937,8 +947,7 @@ public class EasebuzzAutopayRegisterServiceImpl implements EasebuzzAutopayRegist
 			errorResponse = e.getMessage();
 			logger.error("Exception occurred: " + e.getMessage(), e);
 
-			logApi(UrlString, urlParameters, errorResponse, HttpStatus.INTERNAL_SERVER_ERROR, "Failure",
-					"Transaction");
+			logApi(UrlString, urlParameters, errorResponse, HttpStatus.INTERNAL_SERVER_ERROR, "Failure", "Transaction");
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse); // Return the exception
 																								// message
 

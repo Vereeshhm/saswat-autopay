@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.saswat.autopay.dto.CancelMandateDto;
 import com.saswat.autopay.dto.DebitAutopayRequestDto;
@@ -33,14 +32,13 @@ public class EaseBuzzAutoPayController {
 			throws Exception {
 
 		logger.info("Autopay Register Request : " + registerAutopayRequestDto.toString());
-
 		return easebuzzautopayservice.registerAutopay(registerAutopayRequestDto);
 	}
 
 	@PostMapping(value = "/v1/payment/debitRequest", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String> DebitRequest(@RequestBody DebitAutopayRequestDto debitAutopayRequestDto)
 			throws Exception {
-
+		logger.info("Autopay Register Request : " + debitAutopayRequestDto.toString());
 		return easebuzzautopayservice.debitRequest(debitAutopayRequestDto);
 	}
 
